@@ -9,28 +9,12 @@ import {ExampleNFT} from "./ExampleNFT.sol";
 
 import {IZKVerifier} from "../IZKVerifier.sol";
 
-contract SimpleVerifier is Verifier, IZKVerifier {
+contract PubkeyVerifier is Verifier, IZKVerifier {
     address public prover;
-    ExampleNFT public whaleNFT;
-
-
     mapping(bytes32 => bool) public nullifiers;
 
-    constructor(address _prover, address _nft) {
+    constructor(address _prover) {
         prover = _prover;
-        whaleNFT = ExampleNFT(_nft);
-    }
-
-    function claimWhale(Proof calldata, address claimer, uint256 balance)
-        public
-        onlyVerified(prover, SimpleProver.balance.selector)
-    {
-        require(!claimed[claimer], "Already claimed");
-
-        if (balance > 10_000_000) {
-            claimed[claimer] = true;
-            whaleNFT.mint(claimer);
-        }
     }
 
     function verify(Proof calldata proof, bytes32 _nullifier) 

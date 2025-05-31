@@ -6,13 +6,7 @@ import {Prover} from "vlayer-0.1.0/Prover.sol";
 import {IERC20} from "openzeppelin-contracts/token/ERC20/IERC20.sol";
 
 contract PubkeyProver is Prover {
-    IERC20 public immutable TOKEN;
-
     bytes32 public constant SALT = keccak256("ETH_PRAGUE_25");
-
-    constructor(IERC20 _token) {
-        TOKEN = _token;
-    }
 
     function splitSignature (bytes memory _signature) 
         public 
