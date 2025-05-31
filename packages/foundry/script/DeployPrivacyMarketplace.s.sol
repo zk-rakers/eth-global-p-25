@@ -26,18 +26,11 @@ contract DeployPrivacyMarketplace is ScaffoldETHDeploy {
      */
     function run() external ScaffoldEthDeployerRunner {
         PrivacyMarketplace privacyMarketplace = new PrivacyMarketplace();
-        console.logString(
-            string.concat(
-                "PrivacyMarketplace deployed at: ", vm.toString(address(privacyMarketplace))
-            )
-        );
-        
+        console.logString(string.concat("PrivacyMarketplace deployed at: ", vm.toString(address(privacyMarketplace))));
+
         // Store deployment for export
-        deployments.push(Deployment({
-            name: "PrivacyMarketplace",
-            addr: address(privacyMarketplace)
-        }));
+        deployments.push(Deployment({ name: "PrivacyMarketplace", addr: address(privacyMarketplace) }));
     }
 
     function test() public { }
-} 
+}

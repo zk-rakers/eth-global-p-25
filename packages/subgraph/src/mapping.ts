@@ -17,6 +17,8 @@ export function handleRequestPosted(event: RequestPosted): void {
   request.timestamp = event.params.timestamp;
   request.isActive = true;
   request.bidCount = BigInt.fromI32(0);
+  request.userIdentifier = event.params.userIdentifier;
+  request.title = event.params.title;
   request.save();
 }
 
@@ -31,6 +33,7 @@ export function handleBidSubmitted(event: BidSubmitted): void {
   bid.encryptedBidMetadataCID = event.params.encryptedBidMetadataCID;
   bid.timestamp = event.params.timestamp;
   bid.isAccepted = false;
+  bid.userIdentifier = event.params.userIdentifier;
   bid.save();
 
   // Update request bid count

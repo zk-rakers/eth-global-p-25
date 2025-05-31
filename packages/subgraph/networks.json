@@ -1,7 +1,10 @@
 {
   "localhost": {
     "PrivacyMarketplace": {
-      "address": "0x700b6a60ce7eaaea56f065753d8dcb9653dbad35"
+      "address": "0x0c8e79f3534b00d9a3d4a856b665bf4ebc22f2ba"
+    },
+    "ZkAccountFactory": {
+      "address": "0x196dbcbb54b8ec4958c959d8949ebfe87ac2aaaf"
     }
   }
 }

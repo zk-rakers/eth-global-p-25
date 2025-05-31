@@ -65,17 +65,10 @@ contract PrivacyMarketplace {
         uint256 timestamp
     );
 
-    event BidAccepted(
-        uint256 indexed requestId,
-        uint256 indexed bidIndex,
-        uint256 timestamp
-    );
+    event BidAccepted(uint256 indexed requestId, uint256 indexed bidIndex, uint256 timestamp);
 
     event ChannelKeyPublished(
-        uint256 indexed requestId,
-        uint256 indexed bidIndex,
-        string encryptedKey,
-        uint256 timestamp
+        uint256 indexed requestId, uint256 indexed bidIndex, string encryptedKey, uint256 timestamp
     );
 
     error RequestNotFound();
@@ -102,7 +95,7 @@ contract PrivacyMarketplace {
         if (bytes(encryptedCID).length == 0) revert EmptyEncryptedCID();
 
         uint256 requestId = requestCounter++;
-        
+
         Request storage newRequest = requests[requestId];
         newRequest.userIdentifier = userIdentifier;
         newRequest.commitment = commitment;
@@ -130,7 +123,7 @@ contract PrivacyMarketplace {
         string calldata encryptedBidMetadataCID
     ) external {
         Request storage request = requests[requestId];
-        
+
         if (request.timestamp == 0) revert RequestNotFound();
         if (!request.isActive) revert RequestInactive();
         if (userIdentifier == bytes32(0)) revert InvalidCommitment();
@@ -138,7 +131,7 @@ contract PrivacyMarketplace {
         if (bytes(encryptedBidMetadataCID).length == 0) revert EmptyEncryptedCID();
 
         uint256 bidIndex = request.bidCount++;
-        
+
         Bid storage newBid = request.bids[bidIndex];
         newBid.bidderCommitment = bidderCommitment;
         newBid.encryptedBidMetadataCID = encryptedBidMetadataCID;
@@ -167,7 +160,7 @@ contract PrivacyMarketplace {
      */
     function acceptBid(uint256 requestId, uint256 bidIndex) external {
         Request storage request = requests[requestId];
-        
+
         if (request.timestamp == 0) revert RequestNotFound();
         if (!request.isActive) revert RequestInactive();
         if (bidIndex >= request.bidCount) revert BidNotFound();
@@ -185,13 +178,9 @@ contract PrivacyMarketplace {
      * @param bidIndex The index of the accepted bid
      * @param encryptedKey The encrypted communication key for the bidder
      */
-    function publishEncryptedKey(
-        uint256 requestId,
-        uint256 bidIndex,
-        string calldata encryptedKey
-    ) external {
+    function publishEncryptedKey(uint256 requestId, uint256 bidIndex, string calldata encryptedKey) external {
         Request storage request = requests[requestId];
-        
+
         if (request.timestamp == 0) revert RequestNotFound();
         if (bidIndex >= request.bidCount) revert BidNotFound();
         if (!request.bids[bidIndex].isAccepted) revert BidAlreadyAccepted();
@@ -208,9 +197,9 @@ contract PrivacyMarketplace {
      */
     function closeRequest(uint256 requestId) external {
         Request storage request = requests[requestId];
-        
+
         if (request.timestamp == 0) revert RequestNotFound();
-        
+
         request.isActive = false;
     }
 
@@ -277,13 +266,7 @@ contract PrivacyMarketplace {
         if (bidIndex >= request.bidCount) revert BidNotFound();
 
         Bid storage bid = request.bids[bidIndex];
-        return (
-            bid.bidderCommitment,
-            bid.encryptedBidMetadataCID,
-            bid.timestamp,
-            bid.isAccepted,
-            bid.encryptedKey
-        );
+        return (bid.bidderCommitment, bid.encryptedBidMetadataCID, bid.timestamp, bid.isAccepted, bid.encryptedKey);
     }
 
     /**
@@ -292,11 +275,7 @@ contract PrivacyMarketplace {
      * @param bidIndex The index of the bid
      * @return Whether the bid is accepted
      */
-    function isBidAccepted(uint256 requestId, uint256 bidIndex) 
-        external 
-        view 
-        returns (bool) 
-    {
+    function isBidAccepted(uint256 requestId, uint256 bidIndex) external view returns (bool) {
         Request storage request = requests[requestId];
         if (request.timestamp == 0) revert RequestNotFound();
         if (bidIndex >= request.bidCount) revert BidNotFound();

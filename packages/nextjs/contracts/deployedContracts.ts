@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     PrivacyMarketplace: {
-      address: "0x700b6a60ce7eaaea56f065753d8dcb9653dbad35",
+      address: "0x0c8e79f3534b00d9a3d4a856b665bf4ebc22f2ba",
       abi: [
         {
           type: "function",
@@ -96,6 +96,11 @@ const deployedContracts = {
           ],
           outputs: [
             {
+              name: "userIdentifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
               name: "commitment",
               type: "bytes32",
               internalType: "bytes32",
@@ -151,6 +156,56 @@ const deployedContracts = {
         },
         {
           type: "function",
+          name: "getUserBids",
+          inputs: [
+            {
+              name: "userIdentifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "tuple[]",
+              internalType: "struct PrivacyMarketplace.BidReference[]",
+              components: [
+                {
+                  name: "requestId",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "bidIndex",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+              ],
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "getUserRequests",
+          inputs: [
+            {
+              name: "userIdentifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "uint256[]",
+              internalType: "uint256[]",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
           name: "isBidAccepted",
           inputs: [
             {
@@ -178,12 +233,22 @@ const deployedContracts = {
           name: "postRequest",
           inputs: [
             {
+              name: "userIdentifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
               name: "commitment",
               type: "bytes32",
               internalType: "bytes32",
             },
             {
               name: "encryptedCID",
+              type: "string",
+              internalType: "string",
+            },
+            {
+              name: "title",
               type: "string",
               internalType: "string",
             },
@@ -239,6 +304,11 @@ const deployedContracts = {
           ],
           outputs: [
             {
+              name: "userIdentifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
               name: "commitment",
               type: "bytes32",
               internalType: "bytes32",
@@ -276,6 +346,11 @@ const deployedContracts = {
               internalType: "uint256",
             },
             {
+              name: "userIdentifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
               name: "bidderCommitment",
               type: "bytes32",
               internalType: "bytes32",
@@ -293,6 +368,59 @@ const deployedContracts = {
           type: "function",
           name: "totalBids",
           inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "userBids",
+          inputs: [
+            {
+              name: "",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "requestId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "bidIndex",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "userRequests",
+          inputs: [
+            {
+              name: "",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
           outputs: [
             {
               name: "",
@@ -344,9 +472,15 @@ const deployedContracts = {
               internalType: "uint256",
             },
             {
-              name: "bidderCommitment",
+              name: "userIdentifier",
               type: "bytes32",
               indexed: true,
+              internalType: "bytes32",
+            },
+            {
+              name: "bidderCommitment",
+              type: "bytes32",
+              indexed: false,
               internalType: "bytes32",
             },
             {
@@ -406,6 +540,12 @@ const deployedContracts = {
               internalType: "uint256",
             },
             {
+              name: "userIdentifier",
+              type: "bytes32",
+              indexed: true,
+              internalType: "bytes32",
+            },
+            {
               name: "commitment",
               type: "bytes32",
               indexed: true,
@@ -413,6 +553,12 @@ const deployedContracts = {
             },
             {
               name: "encryptedCID",
+              type: "string",
+              indexed: false,
+              internalType: "string",
+            },
+            {
+              name: "title",
               type: "string",
               indexed: false,
               internalType: "string",
@@ -458,7 +604,168 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1748688422.json",
+      deploymentFile: "run-1748715381.json",
+      deploymentScript: "Deploy.s.sol",
+    },
+    ZkAccountFactory: {
+      address: "0x196dbcbb54b8ec4958c959d8949ebfe87ac2aaaf",
+      abi: [
+        {
+          type: "constructor",
+          inputs: [
+            {
+              name: "_entryPoint",
+              type: "address",
+              internalType: "contract IEntryPoint",
+            },
+            {
+              name: "_zkVerifier",
+              type: "address",
+              internalType: "contract IZKVerifier",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "createAccount",
+          inputs: [
+            {
+              name: "proof",
+              type: "bytes",
+              internalType: "bytes",
+            },
+            {
+              name: "root",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
+              name: "salt",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+          ],
+          outputs: [
+            {
+              name: "ret",
+              type: "address",
+              internalType: "contract ZkAccount",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "createAccountWithAutoSalt",
+          inputs: [
+            {
+              name: "proof",
+              type: "bytes",
+              internalType: "bytes",
+            },
+            {
+              name: "root",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "contract ZkAccount",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "entryPoint",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "contract IEntryPoint",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "generateSalt",
+          inputs: [
+            {
+              name: "owner",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "nonce",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+          ],
+          stateMutability: "pure",
+        },
+        {
+          type: "function",
+          name: "getAddress",
+          inputs: [
+            {
+              name: "proof",
+              type: "bytes",
+              internalType: "bytes",
+            },
+            {
+              name: "root",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
+              name: "salt",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "zkVerifier",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "contract IZKVerifier",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "error",
+          name: "InvalidProof",
+          inputs: [],
+        },
+      ],
+      inheritedFunctions: {},
+      deploymentFile: "run-1748715381.json",
       deploymentScript: "Deploy.s.sol",
     },
   },
