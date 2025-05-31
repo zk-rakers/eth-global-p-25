@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { encodeFunctionData, keccak256, toHex } from "viem";
+import { useAccount, useWalletClient } from "wagmi";
 import { EtherInput } from "~~/components/scaffold-eth";
 import { use4337UserOp } from "~~/hooks/k-marketplace";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
@@ -16,6 +17,7 @@ interface RequestFormData {
   requirements: string;
   contactPreferences: string;
   salt: string;
+  userSecret: string;
 }
 
 interface EncryptedRequestMetadata {
@@ -35,6 +37,9 @@ interface EncryptedRequestMetadata {
  * Implements privacy-preserving request posting with commitment schemes and encrypted metadata
  */
 export const PostRequest = () => {
+  const { address } = useAccount();
+  const { data: walletClient } = useWalletClient();
+
   const [formData, setFormData] = useState<RequestFormData>({
     title: "",
     description: "",
@@ -44,6 +49,7 @@ export const PostRequest = () => {
     requirements: "",
     contactPreferences: "",
     salt: "",
+    userSecret: "🎮🌟🎨🎭🎪🎢🎡🎯", // Default 8 emoji string
   });
 
   const [isPosting, setIsPosting] = useState(false);
@@ -117,18 +123,29 @@ export const PostRequest = () => {
       return;
     }
 
-    // if (!isInitialized) {
-    //   notification.error("Smart account not initialized. Please check your wallet connection.");
-    //   return;
-    // }
+    if (!address || !walletClient) {
+      notification.error("Wallet not connected. Please connect your wallet.");
+      return;
+    }
 
     setIsPosting(true);
     let notificationId: string | null = null;
 
     try {
-      notificationId = notification.loading("Preparing encrypted request metadata...");
+      // Generate user identifier by signing a message
+      const message = `${formData.userSecret}`;
+      notificationId = notification.loading("Signing to generate your user identifier...");
+
+      const signature = await walletClient.signMessage({
+        account: address,
+        message: message,
+      });
+
+      const userIdentifier = keccak256(toHex(signature));
+      notification.remove(notificationId);
 
       // Prepare encrypted metadata
+      notificationId = notification.loading("Preparing encrypted request metadata...");
       const metadata: EncryptedRequestMetadata = {
         title: formData.title,
         description: formData.description,
@@ -153,22 +170,24 @@ export const PostRequest = () => {
       notification.remove(notificationId);
       notificationId = notification.loading("Encoding transaction data...");
 
-      // Encode the postRequest function call
+      // Encode the postRequest function call with userIdentifier
       const postRequestData = encodeFunctionData({
         abi: [
           {
             type: "function",
             name: "postRequest",
             inputs: [
+              { name: "userIdentifier", type: "bytes32", internalType: "bytes32" },
               { name: "commitment", type: "bytes32", internalType: "bytes32" },
               { name: "encryptedCID", type: "string", internalType: "string" },
+              { name: "title", type: "string", internalType: "string" },
             ],
             outputs: [],
             stateMutability: "nonpayable",
           },
         ],
         functionName: "postRequest",
-        args: [commitment, encryptedCID],
+        args: [userIdentifier, commitment, encryptedCID, formData.title],
       });
 
       notification.remove(notificationId);
@@ -203,6 +222,10 @@ export const PostRequest = () => {
       notification.remove(notificationId);
 
       if (result && result.success) {
+        // Store the user identifier and secret locally
+        // localStorage.setItem(`request_${totalRequests}_identifier`, userIdentifier);
+        // localStorage.setItem(`request_${totalRequests}_secret`, formData.userSecret);
+
         notification.success(
           `Request posted successfully! 🎉\nUser Operation Hash: ${result.userOpHash.slice(0, 10)}...\nYour request will have ID: ${totalRequests?.toString() || "N/A"}`,
           {
@@ -221,6 +244,7 @@ export const PostRequest = () => {
           requirements: "",
           contactPreferences: "",
           salt: generateSalt(),
+          userSecret: "🎮🌟🎨🎭🎪🎢🎡🎯", // Reset to default emoji string
         });
       } else {
         throw new Error("Transaction failed");
@@ -373,6 +397,25 @@ export const PostRequest = () => {
         </div>
       </div>
 
+      {/* User Secret */}
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text font-semibold">User Secret (8 Emojis)</span>
+          <span className="label-text-alt">Your unique identifier</span>
+        </label>
+        <input
+          type="text"
+          className="input input-bordered font-emoji"
+          value={formData.userSecret}
+          onChange={e => handleInputChange("userSecret", e.target.value)}
+          maxLength={24} // 8 emojis × 3 bytes max per emoji
+          placeholder="🎮🌟🎨🎭🎪🎢🎡🎯"
+        />
+        <label className="label">
+          <span className="label-text-alt">This will be used to identify your requests</span>
+        </label>
+      </div>
+
       {/* Gasless Transaction Option */}
       <div className="form-control">
         <label className="label cursor-pointer">
@@ -392,7 +435,13 @@ export const PostRequest = () => {
       </div>
 
       {/* Submit Button */}
-      <button className="btn btn-primary btn-lg" onClick={handlePostRequest}>
+      <button
+        className="btn btn-primary btn-lg"
+        onClick={handlePostRequest}
+        disabled={
+          isLoading || !address || !walletClient || !formData.title || !formData.description || !formData.budget
+        }
+      >
         {isLoading ? (
           <>
             <span className="loading loading-spinner loading-sm"></span>

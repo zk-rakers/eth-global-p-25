@@ -62,10 +62,16 @@
   },
   "devDependencies": {
     "husky": "~9.1.6",
-    "lint-staged": "~13.2.2"
+    "lint-staged": "~13.2.2",
+    "pino-pretty": "^13.0.0"
   },
   "packageManager": "yarn@3.2.3",
   "engines": {
     "node": ">=20.18.3"
+  },
+  "dependencies": {
+    "@mistralai/mistralai": "^1.7.1",
+    "e2b": "^1.5.0",
+    "zod": "^3.25.42"
   }
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { encodeFunctionData, keccak256, toHex } from "viem";
+import { useAccount, useWalletClient } from "wagmi";
 import { EtherInput } from "~~/components/scaffold-eth";
 import { use4337UserOp } from "~~/hooks/k-marketplace";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
@@ -14,6 +15,7 @@ interface BidFormData {
   deliveryTime: string;
   contactInfo: string;
   nonce: string;
+  userSecret: string;
 }
 
 interface EncryptedMetadata {
@@ -36,11 +38,15 @@ export const CreateBid = () => {
     deliveryTime: "",
     contactInfo: "",
     nonce: "",
+    userSecret: "🎮🌟🎨🎭🎪🎢🎡🎯", // Default 8 emoji string
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [usePaymaster, setUsePaymaster] = useState(true);
   const [requestDetails, setRequestDetails] = useState<any>(null);
+
+  const { address } = useAccount();
+  const { data: walletClient } = useWalletClient();
 
   // Initialize 4337 hook
   const {
@@ -120,13 +126,18 @@ export const CreateBid = () => {
       return;
     }
 
+    if (!address || !walletClient) {
+      notification.error("Wallet not connected. Please connect your wallet.");
+      return;
+    }
+
     if (!requestDetails) {
       notification.error("Invalid request ID or request not found");
       return;
     }
 
-    if (!requestDetails[3]) {
-      // isActive
+    if (!requestDetails[4]) {
+      // requestDetails[4] is isActive in this ABI
       notification.error("This request is no longer accepting bids");
       return;
     }
@@ -135,9 +146,20 @@ export const CreateBid = () => {
     let notificationId: string | null = null;
 
     try {
-      notificationId = notification.loading("Preparing encrypted bid metadata...");
+      // Generate user identifier by signing a message
+      const message = `${formData.userSecret}`;
+      notificationId = notification.loading("Signing to generate your user identifier...");
+
+      const signature = await walletClient.signMessage({
+        account: address,
+        message: message,
+      });
+
+      const userIdentifier = keccak256(toHex(signature));
+      notification.remove(notificationId);
 
       // Prepare encrypted metadata
+      notificationId = notification.loading("Preparing encrypted bid metadata...");
       const metadata: EncryptedMetadata = {
         bidAmount: formData.bidAmount,
         proposalText: formData.proposalText,
@@ -153,6 +175,7 @@ export const CreateBid = () => {
       notificationId = notification.loading("Generating privacy commitment...");
 
       // Generate bidder commitment for privacy
+      notificationId = notification.loading("Generating privacy commitment...");
       const mockPublicKey = `bidder_${formData.requestId}_${Date.now()}`;
       const bidderCommitment = generateCommitment(mockPublicKey, formData.nonce);
 
@@ -167,6 +190,7 @@ export const CreateBid = () => {
             name: "submitBid",
             inputs: [
               { name: "requestId", type: "uint256", internalType: "uint256" },
+              { name: "userIdentifier", type: "bytes32", internalType: "bytes32" },
               { name: "bidderCommitment", type: "bytes32", internalType: "bytes32" },
               { name: "encryptedBidMetadataCID", type: "string", internalType: "string" },
             ],
@@ -175,7 +199,7 @@ export const CreateBid = () => {
           },
         ],
         functionName: "submitBid",
-        args: [BigInt(formData.requestId), bidderCommitment, encryptedCID],
+        args: [BigInt(formData.requestId), userIdentifier, bidderCommitment, encryptedCID],
       });
 
       notification.remove(notificationId);
@@ -218,7 +242,11 @@ export const CreateBid = () => {
           },
         );
 
-        // Reset form
+        // Store the user identifier and secret locally
+        // localStorage.setItem(`bid_${formData.requestId}_${Date.now()}_identifier`, userIdentifier);
+        // localStorage.setItem(`bid_${formData.requestId}_${Date.now()}_secret`, formData.userSecret);
+
+        // Reset form with default emoji string
         setFormData({
           requestId: "",
           bidAmount: "",
@@ -226,6 +254,7 @@ export const CreateBid = () => {
           deliveryTime: "",
           contactInfo: "",
           nonce: generateNonce(),
+          userSecret: "🎮🌟🎨🎭🎪🎢🎡🎯",
         });
       } else {
         throw new Error("Transaction failed");
@@ -265,20 +294,21 @@ export const CreateBid = () => {
         />
       </div>
 
-      {/* Request Details Display */}
+      {/* Request Details Display - Fixed indices */}
       {requestDetails && (
         <div className="alert alert-success">
           <div className="flex flex-col gap-1">
             <div className="font-semibold">✅ Request Found</div>
             <div className="text-sm">
               <p>
-                <strong>Status:</strong> {requestDetails[3] ? "Active" : "Closed"}
+                <strong>Status:</strong> {requestDetails[4] ? "Active" : "Closed"} {/* isActive is at index 4 */}
               </p>
               <p>
-                <strong>Existing Bids:</strong> {requestDetails[4]?.toString() || "0"}
+                <strong>Existing Bids:</strong> {requestDetails[5]?.toString() || "0"} {/* bidCount is at index 5 */}
               </p>
               <p>
-                <strong>Posted:</strong> {new Date(Number(requestDetails[2]) * 1000).toLocaleDateString()}
+                <strong>Posted:</strong> {new Date(Number(requestDetails[3]) * 1000).toLocaleDateString()}{" "}
+                {/* timestamp is at index 3 */}
               </p>
             </div>
           </div>
@@ -365,6 +395,25 @@ export const CreateBid = () => {
         </div>
       </div>
 
+      {/* User Secret Input */}
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text font-semibold">User Secret (8 Emojis)</span>
+          <span className="label-text-alt">Your unique identifier</span>
+        </label>
+        <input
+          type="text"
+          className="input input-bordered font-emoji"
+          value={formData.userSecret}
+          onChange={e => handleInputChange("userSecret", e.target.value)}
+          maxLength={24} // 8 emojis × 3 bytes max per emoji
+          placeholder="🎮🌟🎨🎭🎪🎢🎡🎯"
+        />
+        <label className="label">
+          <span className="label-text-alt">This will be used to identify your bids</span>
+        </label>
+      </div>
+
       {/* Gasless Transaction Option */}
       <div className="form-control">
         <label className="label cursor-pointer">
@@ -389,10 +438,12 @@ export const CreateBid = () => {
         onClick={handleSubmitBid}
         disabled={
           isLoading ||
+          !address ||
+          !walletClient ||
           !formData.requestId ||
           !formData.bidAmount ||
           !formData.proposalText ||
-          (requestDetails && !requestDetails[3])
+          (requestDetails && !requestDetails[4])
         }
       >
         {isLoading ? (
@@ -415,6 +466,10 @@ export const CreateBid = () => {
           </li>
           <li>
             <strong>Commitment Scheme:</strong> Your identity is protected with cryptographic commitments
+          </li>
+          <li>
+            <strong>User Identifier:</strong> A signature-based ID ties you to your bids without revealing your address
+            on-chain
           </li>
           <li>
             <strong>Meta-Transactions:</strong> Submit bids without revealing your wallet address on-chain

@@ -14,9 +14,18 @@ contract PrivacyMarketplace {
     uint256 public requestCounter = 0;
     uint256 public totalBids = 0;
 
+    struct Bid {
+        bytes32 bidderCommitment;      // keccak256(pubkey || nonce)
+        string encryptedBidMetadataCID; // IPFS/Filecoin link to encrypted bid data
+        uint256 timestamp;
+        bool isAccepted;
+        string encryptedKey;           // Set after bid acceptance for communication
+    }
+
     struct Request {
-        bytes32 commitment; // keccak256(encryptedCID || salt)
-        string encryptedCID; // IPFS/Filecoin link to encrypted metadata
+        bytes32 userIdentifier;        // keccak256(signature) of (secret || address)
+        bytes32 commitment;            // keccak256(encryptedCID || salt)
+        string encryptedCID;           // IPFS/Filecoin link to encrypted metadata
         uint256 timestamp;
         bool isActive;
         uint256 bidCount;
@@ -24,22 +33,34 @@ contract PrivacyMarketplace {
         mapping(uint256 => bool) acceptedBids;
     }
 
-    struct Bid {
-        bytes32 bidderCommitment; // keccak256(pubkey || nonce)
-        string encryptedBidMetadataCID; // IPFS/Filecoin link to encrypted bid data
-        uint256 timestamp;
-        bool isAccepted;
-        string encryptedKey; // Set after bid acceptance for communication
+    struct BidReference {
+        uint256 requestId;
+        uint256 bidIndex;
     }
 
+    // Mapping from requestId => Request struct
     mapping(uint256 => Request) public requests;
 
-    event RequestPosted(uint256 indexed requestId, bytes32 indexed commitment, string encryptedCID, uint256 timestamp);
+    // Mapping from userIdentifier => list of requestIds posted by that user
+    mapping(bytes32 => uint256[]) public userRequests;
+
+    // Mapping from userIdentifier => list of bids (with requestId and bidIndex)
+    mapping(bytes32 => BidReference[]) public userBids;
+
+    event RequestPosted(
+        uint256 indexed requestId,
+        bytes32 indexed userIdentifier,
+        bytes32 indexed commitment,
+        string encryptedCID,
+        string title,
+        uint256 timestamp
+    );
 
     event BidSubmitted(
         uint256 indexed requestId,
         uint256 indexed bidIndex,
-        bytes32 indexed bidderCommitment,
+        bytes32 indexed userIdentifier,
+        bytes32 bidderCommitment,
         string encryptedBidMetadataCID,
         uint256 timestamp
     );
@@ -59,36 +80,53 @@ contract PrivacyMarketplace {
 
     /**
      * @dev Posts an encrypted service request anonymously
+     * @param userIdentifier keccak256(signature) of (secret || msg.sender)
      * @param commitment Hash of encryptedCID + salt for privacy
      * @param encryptedCID IPFS/Filecoin link to encrypted request metadata
      */
-    function postRequest(bytes32 commitment, string calldata encryptedCID) external {
+    function postRequest(
+        bytes32 userIdentifier,
+        bytes32 commitment,
+        string calldata encryptedCID,
+        string calldata title
+    ) external {
+        if (userIdentifier == bytes32(0)) revert InvalidCommitment();
         if (commitment == bytes32(0)) revert InvalidCommitment();
         if (bytes(encryptedCID).length == 0) revert EmptyEncryptedCID();
 
         uint256 requestId = requestCounter++;
 
         Request storage newRequest = requests[requestId];
+        newRequest.userIdentifier = userIdentifier;
         newRequest.commitment = commitment;
         newRequest.encryptedCID = encryptedCID;
         newRequest.timestamp = block.timestamp;
         newRequest.isActive = true;
         newRequest.bidCount = 0;
 
-        emit RequestPosted(requestId, commitment, encryptedCID, block.timestamp);
+        userRequests[userIdentifier].push(requestId);
+
+        emit RequestPosted(requestId, userIdentifier, commitment, encryptedCID, title, block.timestamp);
     }
 
     /**
      * @dev Submits a private bid on a request
      * @param requestId The ID of the request to bid on
+     * @param userIdentifier keccak256(signature) of (secret || msg.sender)
      * @param bidderCommitment Hash of bidder's pubkey + nonce for privacy
      * @param encryptedBidMetadataCID IPFS/Filecoin link to encrypted bid data
      */
-    function submitBid(uint256 requestId, bytes32 bidderCommitment, string calldata encryptedBidMetadataCID) external {
+    function submitBid(
+        uint256 requestId,
+        bytes32 userIdentifier,
+        bytes32 bidderCommitment,
+        string calldata encryptedBidMetadataCID
+    ) external {
         Request storage request = requests[requestId];
 
         if (request.timestamp == 0) revert RequestNotFound();
         if (!request.isActive) revert RequestInactive();
+        if (userIdentifier == bytes32(0)) revert InvalidCommitment();
         if (bidderCommitment == bytes32(0)) revert InvalidCommitment();
         if (bytes(encryptedBidMetadataCID).length == 0) revert EmptyEncryptedCID();
 
@@ -102,7 +140,17 @@ contract PrivacyMarketplace {
 
         totalBids++;
 
-        emit BidSubmitted(requestId, bidIndex, bidderCommitment, encryptedBidMetadataCID, block.timestamp);
+        // Record this bid for the user
+        userBids[userIdentifier].push(BidReference({ requestId: requestId, bidIndex: bidIndex }));
+
+        emit BidSubmitted(
+            requestId,
+            bidIndex,
+            userIdentifier,
+            bidderCommitment,
+            encryptedBidMetadataCID,
+            block.timestamp
+        );
     }
 
     /**
@@ -160,21 +208,36 @@ contract PrivacyMarketplace {
     /**
      * @dev Gets request details
      * @param requestId The ID of the request
+     * @return userIdentifier The user identifier who posted the request
      * @return commitment The request commitment hash
      * @return encryptedCID The encrypted metadata CID
      * @return timestamp When the request was posted
      * @return isActive Whether the request is still accepting bids
      * @return bidCount Number of bids on this request
      */
-    function getRequest(uint256 requestId)
-        external
-        view
-        returns (bytes32 commitment, string memory encryptedCID, uint256 timestamp, bool isActive, uint256 bidCount)
+    function getRequest(uint256 requestId) 
+        external 
+        view 
+        returns (
+            bytes32 userIdentifier,
+            bytes32 commitment,
+            string memory encryptedCID,
+            uint256 timestamp,
+            bool isActive,
+            uint256 bidCount
+        ) 
     {
         Request storage request = requests[requestId];
         if (request.timestamp == 0) revert RequestNotFound();
 
-        return (request.commitment, request.encryptedCID, request.timestamp, request.isActive, request.bidCount);
+        return (
+            request.userIdentifier,
+            request.commitment,
+            request.encryptedCID,
+            request.timestamp,
+            request.isActive,
+            request.bidCount
+        );
     }
 
     /**
@@ -235,4 +298,22 @@ contract PrivacyMarketplace {
     function getTotalBids() external view returns (uint256) {
         return totalBids;
     }
-}
+
+    /**
+     * @dev Retrieves all request IDs posted by a given userIdentifier
+     * @param userIdentifier The user identifier to query
+     * @return An array of request IDs
+     */
+    function getUserRequests(bytes32 userIdentifier) external view returns (uint256[] memory) {
+        return userRequests[userIdentifier];
+    }
+
+    /**
+     * @dev Retrieves all bids submitted by a given userIdentifier
+     * @param userIdentifier The user identifier to query
+     * @return An array of BidReference structs (requestId, bidIndex)
+     */
+    function getUserBids(bytes32 userIdentifier) external view returns (BidReference[] memory) {
+        return userBids[userIdentifier];
+    }
+} 

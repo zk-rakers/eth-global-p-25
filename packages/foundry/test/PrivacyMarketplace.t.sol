@@ -13,6 +13,7 @@ contract PrivacyMarketplaceTest is Test {
     address public bidder2;
 
     // Test data
+    bytes32 public userIdentifier;
     bytes32 public testCommitment = keccak256(abi.encodePacked("test_cid", "salt123"));
     string public testEncryptedCID = "QmTestEncryptedCID123";
     bytes32 public testBidderCommitment1 = keccak256(abi.encodePacked("bidder1_pubkey", "nonce1"));
@@ -28,6 +29,9 @@ contract PrivacyMarketplaceTest is Test {
         requester = makeAddr("requester");
         bidder1 = makeAddr("bidder1");
         bidder2 = makeAddr("bidder2");
+
+        // Generate a user identifier for testing
+        userIdentifier = keccak256(abi.encodePacked("test_user_secret", requester));
     }
 
     function testPostRequest() public {
@@ -35,12 +39,12 @@ contract PrivacyMarketplaceTest is Test {
 
         // Expected event emission
         vm.expectEmit(true, true, false, true);
-        emit PrivacyMarketplace.RequestPosted(0, testCommitment, testEncryptedCID, block.timestamp);
-
-        marketplace.postRequest(testCommitment, testEncryptedCID);
-
+        emit PrivacyMarketplace.RequestPosted(0, userIdentifier, testCommitment, testEncryptedCID, "test title", block.timestamp);
+        
+        marketplace.postRequest(userIdentifier, testCommitment, testEncryptedCID, "test title");
+        
         // Verify request was stored correctly
-        (bytes32 commitment, string memory encryptedCID, uint256 timestamp, bool isActive, uint256 bidCount) =
+        (bytes32 reqUserIdentifier, bytes32 commitment, string memory encryptedCID, uint256 timestamp, bool isActive, uint256 bidCount) = 
             marketplace.getRequest(0);
 
         assertEq(commitment, testCommitment);
@@ -56,26 +60,26 @@ contract PrivacyMarketplaceTest is Test {
 
         // Test invalid commitment
         vm.expectRevert(PrivacyMarketplace.InvalidCommitment.selector);
-        marketplace.postRequest(bytes32(0), testEncryptedCID);
-
+        marketplace.postRequest(bytes32(0), bytes32(0), testEncryptedCID, "test title");
+        
         // Test empty encrypted CID
         vm.expectRevert(PrivacyMarketplace.EmptyEncryptedCID.selector);
-        marketplace.postRequest(testCommitment, "");
+        marketplace.postRequest(userIdentifier, testCommitment, "", "test title");
     }
 
     function testSubmitBid() public {
         // First post a request
         vm.prank(requester);
-        marketplace.postRequest(testCommitment, testEncryptedCID);
-
+        marketplace.postRequest(userIdentifier, testCommitment, testEncryptedCID, "test title");
+        
         // Submit a bid
         vm.prank(bidder1);
 
         vm.expectEmit(true, true, true, true);
-        emit PrivacyMarketplace.BidSubmitted(0, 0, testBidderCommitment1, testBidMetadataCID1, block.timestamp);
-
-        marketplace.submitBid(0, testBidderCommitment1, testBidMetadataCID1);
-
+        emit PrivacyMarketplace.BidSubmitted(0, 0, userIdentifier, testBidderCommitment1, testBidMetadataCID1, block.timestamp);
+        
+        marketplace.submitBid(0, userIdentifier, testBidderCommitment1, testBidMetadataCID1);
+        
         // Verify bid was stored correctly
         (
             bytes32 bidderCommitment,
@@ -93,23 +97,23 @@ contract PrivacyMarketplaceTest is Test {
         assertEq(marketplace.getTotalBids(), 1);
 
         // Verify request bid count was updated
-        (,,,, uint256 bidCount) = marketplace.getRequest(0);
+        (, , , , , uint256 bidCount) = marketplace.getRequest(0);
         assertEq(bidCount, 1);
     }
 
     function testSubmitMultipleBids() public {
         // Post a request
         vm.prank(requester);
-        marketplace.postRequest(testCommitment, testEncryptedCID);
-
+        marketplace.postRequest(userIdentifier, testCommitment, testEncryptedCID, "test title");
+        
         // Submit first bid
         vm.prank(bidder1);
-        marketplace.submitBid(0, testBidderCommitment1, testBidMetadataCID1);
-
+        marketplace.submitBid(0, userIdentifier, testBidderCommitment1, testBidMetadataCID1);
+        
         // Submit second bid
         vm.prank(bidder2);
-        marketplace.submitBid(0, testBidderCommitment2, testBidMetadataCID2);
-
+        marketplace.submitBid(0, userIdentifier, testBidderCommitment2, testBidMetadataCID2);
+        
         // Verify both bids exist
         (bytes32 bidderCommitment1,,,,) = marketplace.getBid(0, 0);
         (bytes32 bidderCommitment2,,,,) = marketplace.getBid(0, 1);
@@ -117,47 +121,47 @@ contract PrivacyMarketplaceTest is Test {
         assertEq(bidderCommitment1, testBidderCommitment1);
         assertEq(bidderCommitment2, testBidderCommitment2);
         assertEq(marketplace.getTotalBids(), 2);
-
-        (,,,, uint256 bidCount) = marketplace.getRequest(0);
+        
+        (, , , , , uint256 bidCount) = marketplace.getRequest(0);
         assertEq(bidCount, 2);
     }
 
     function testSubmitBidFailures() public {
         // Post a request first
         vm.prank(requester);
-        marketplace.postRequest(testCommitment, testEncryptedCID);
-
+        marketplace.postRequest(userIdentifier, testCommitment, testEncryptedCID, "test title");
+        
         vm.prank(bidder1);
 
         // Test bid on non-existent request
         vm.expectRevert(PrivacyMarketplace.RequestNotFound.selector);
-        marketplace.submitBid(999, testBidderCommitment1, testBidMetadataCID1);
-
+        marketplace.submitBid(999, userIdentifier, testBidderCommitment1, testBidMetadataCID1);
+        
         // Test invalid bidder commitment
         vm.expectRevert(PrivacyMarketplace.InvalidCommitment.selector);
-        marketplace.submitBid(0, bytes32(0), testBidMetadataCID1);
-
+        marketplace.submitBid(0, userIdentifier, bytes32(0), testBidMetadataCID1);
+        
         // Test empty bid metadata CID
         vm.expectRevert(PrivacyMarketplace.EmptyEncryptedCID.selector);
-        marketplace.submitBid(0, testBidderCommitment1, "");
-
+        marketplace.submitBid(0, userIdentifier, testBidderCommitment1, "");
+        
         // Close the request and try to bid on inactive request
         vm.prank(requester);
         marketplace.closeRequest(0);
 
         vm.prank(bidder1);
         vm.expectRevert(PrivacyMarketplace.RequestInactive.selector);
-        marketplace.submitBid(0, testBidderCommitment1, testBidMetadataCID1);
+        marketplace.submitBid(0, userIdentifier, testBidderCommitment1, testBidMetadataCID1);
     }
 
     function testAcceptBid() public {
         // Setup: post request and submit bid
         vm.prank(requester);
-        marketplace.postRequest(testCommitment, testEncryptedCID);
-
+        marketplace.postRequest(userIdentifier, testCommitment, testEncryptedCID, "test title");
+        
         vm.prank(bidder1);
-        marketplace.submitBid(0, testBidderCommitment1, testBidMetadataCID1);
-
+        marketplace.submitBid(0, userIdentifier, testBidderCommitment1, testBidMetadataCID1);
+        
         // Accept the bid
         vm.prank(requester);
 
@@ -175,11 +179,11 @@ contract PrivacyMarketplaceTest is Test {
     function testAcceptBidFailures() public {
         // Setup: post request and submit bid
         vm.prank(requester);
-        marketplace.postRequest(testCommitment, testEncryptedCID);
-
+        marketplace.postRequest(userIdentifier, testCommitment, testEncryptedCID, "test title");
+        
         vm.prank(bidder1);
-        marketplace.submitBid(0, testBidderCommitment1, testBidMetadataCID1);
-
+        marketplace.submitBid(0, userIdentifier, testBidderCommitment1, testBidMetadataCID1);
+        
         vm.prank(requester);
 
         // Test accept non-existent request
@@ -199,8 +203,8 @@ contract PrivacyMarketplaceTest is Test {
 
         // Submit another bid before closing request
         vm.prank(bidder2);
-        marketplace.submitBid(0, testBidderCommitment2, testBidMetadataCID2);
-
+        marketplace.submitBid(0, userIdentifier, testBidderCommitment2, testBidMetadataCID2);
+        
         // Close request and try to accept on inactive request
         marketplace.closeRequest(0);
 
@@ -211,11 +215,11 @@ contract PrivacyMarketplaceTest is Test {
     function testPublishEncryptedKey() public {
         // Setup: post request, submit bid, and accept bid
         vm.prank(requester);
-        marketplace.postRequest(testCommitment, testEncryptedCID);
-
+        marketplace.postRequest(userIdentifier, testCommitment, testEncryptedCID, "test title");
+        
         vm.prank(bidder1);
-        marketplace.submitBid(0, testBidderCommitment1, testBidMetadataCID1);
-
+        marketplace.submitBid(0, userIdentifier, testBidderCommitment1, testBidMetadataCID1);
+        
         vm.prank(requester);
         marketplace.acceptBid(0, 0);
 
@@ -235,11 +239,11 @@ contract PrivacyMarketplaceTest is Test {
     function testPublishEncryptedKeyFailures() public {
         // Setup: post request and submit bid
         vm.prank(requester);
-        marketplace.postRequest(testCommitment, testEncryptedCID);
-
+        marketplace.postRequest(userIdentifier, testCommitment, testEncryptedCID, "test title");
+        
         vm.prank(bidder1);
-        marketplace.submitBid(0, testBidderCommitment1, testBidMetadataCID1);
-
+        marketplace.submitBid(0, userIdentifier, testBidderCommitment1, testBidMetadataCID1);
+        
         vm.prank(requester);
 
         // Test publish key for non-existent request
@@ -264,10 +268,10 @@ contract PrivacyMarketplaceTest is Test {
     function testCloseRequest() public {
         // Post a request
         vm.prank(requester);
-        marketplace.postRequest(testCommitment, testEncryptedCID);
-
+        marketplace.postRequest(userIdentifier, testCommitment, testEncryptedCID, "test title");
+        
         // Verify request is active
-        (,,, bool isActive,) = marketplace.getRequest(0);
+        (bytes32 reqUserIdentifier, bytes32 commitment, string memory encryptedCID, uint256 timestamp, bool isActive, uint256 bidCount) = marketplace.getRequest(0);
         assertTrue(isActive);
 
         // Close the request
@@ -275,22 +279,22 @@ contract PrivacyMarketplaceTest is Test {
         marketplace.closeRequest(0);
 
         // Verify request is inactive
-        (,,, isActive,) = marketplace.getRequest(0);
+        (reqUserIdentifier, commitment, encryptedCID, timestamp, isActive, bidCount) = marketplace.getRequest(0);
         assertFalse(isActive);
     }
 
     function testFullWorkflow() public {
         // 1. Post request
         vm.prank(requester);
-        marketplace.postRequest(testCommitment, testEncryptedCID);
-
+        marketplace.postRequest(userIdentifier, testCommitment, testEncryptedCID, "test title");
+        
         // 2. Submit multiple bids
         vm.prank(bidder1);
-        marketplace.submitBid(0, testBidderCommitment1, testBidMetadataCID1);
-
+        marketplace.submitBid(0, userIdentifier, testBidderCommitment1, testBidMetadataCID1);
+        
         vm.prank(bidder2);
-        marketplace.submitBid(0, testBidderCommitment2, testBidMetadataCID2);
-
+        marketplace.submitBid(0, userIdentifier, testBidderCommitment2, testBidMetadataCID2);
+        
         // 3. Accept one bid
         vm.prank(requester);
         marketplace.acceptBid(0, 1); // Accept bidder2's bid
@@ -315,12 +319,12 @@ contract PrivacyMarketplaceTest is Test {
 
         // Post request - verify no sender address is stored
         vm.prank(requester);
-        marketplace.postRequest(testCommitment, testEncryptedCID);
-
+        marketplace.postRequest(userIdentifier, testCommitment, testEncryptedCID, "test title");
+        
         // Submit bid - verify no bidder address is stored
         vm.prank(bidder1);
-        marketplace.submitBid(0, testBidderCommitment1, testBidMetadataCID1);
-
+        marketplace.submitBid(0, userIdentifier, testBidderCommitment1, testBidMetadataCID1);
+        
         // The contract should only store commitment hashes, not addresses
         // This is verified by the fact that getBid returns only the commitment hash
         (bytes32 bidderCommitment,,,,) = marketplace.getBid(0, 0);
