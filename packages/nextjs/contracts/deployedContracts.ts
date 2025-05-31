@@ -7,147 +7,604 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     YourContract: {
-      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      address: "0x700b6a60ce7eaaea56f065753d8dcb9653dbad35",
       abi: [
         {
+          type: "constructor",
           inputs: [
             {
-              internalType: "address",
               name: "_owner",
               type: "address",
+              internalType: "address",
             },
           ],
           stateMutability: "nonpayable",
-          type: "constructor",
         },
         {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "address",
-              name: "greetingSetter",
-              type: "address",
-            },
-            {
-              indexed: false,
-              internalType: "string",
-              name: "newGreeting",
-              type: "string",
-            },
-            {
-              indexed: false,
-              internalType: "bool",
-              name: "premium",
-              type: "bool",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "value",
-              type: "uint256",
-            },
-          ],
-          name: "GreetingChange",
-          type: "event",
+          type: "receive",
+          stateMutability: "payable",
         },
         {
-          inputs: [],
+          type: "function",
           name: "greeting",
+          inputs: [],
           outputs: [
             {
-              internalType: "string",
               name: "",
               type: "string",
+              internalType: "string",
             },
           ],
           stateMutability: "view",
-          type: "function",
         },
         {
-          inputs: [],
+          type: "function",
           name: "owner",
+          inputs: [],
           outputs: [
             {
-              internalType: "address",
               name: "",
               type: "address",
+              internalType: "address",
             },
           ],
           stateMutability: "view",
-          type: "function",
         },
         {
-          inputs: [],
+          type: "function",
           name: "premium",
+          inputs: [],
           outputs: [
             {
-              internalType: "bool",
               name: "",
               type: "bool",
+              internalType: "bool",
             },
           ],
           stateMutability: "view",
-          type: "function",
         },
         {
+          type: "function",
+          name: "setGreeting",
           inputs: [
             {
-              internalType: "string",
               name: "_newGreeting",
               type: "string",
+              internalType: "string",
             },
           ],
-          name: "setGreeting",
           outputs: [],
           stateMutability: "payable",
-          type: "function",
         },
         {
-          inputs: [],
+          type: "function",
           name: "totalCounter",
+          inputs: [],
           outputs: [
             {
-              internalType: "uint256",
               name: "",
               type: "uint256",
+              internalType: "uint256",
             },
           ],
           stateMutability: "view",
-          type: "function",
         },
         {
+          type: "function",
+          name: "userGreetingCounter",
           inputs: [
             {
-              internalType: "address",
               name: "",
               type: "address",
+              internalType: "address",
             },
           ],
-          name: "userGreetingCounter",
           outputs: [
             {
-              internalType: "uint256",
               name: "",
               type: "uint256",
+              internalType: "uint256",
             },
           ],
           stateMutability: "view",
-          type: "function",
         },
         {
-          inputs: [],
+          type: "function",
           name: "withdraw",
+          inputs: [],
           outputs: [],
           stateMutability: "nonpayable",
-          type: "function",
         },
         {
-          stateMutability: "payable",
-          type: "receive",
+          type: "event",
+          name: "GreetingChange",
+          inputs: [
+            {
+              name: "greetingSetter",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "newGreeting",
+              type: "string",
+              indexed: false,
+              internalType: "string",
+            },
+            {
+              name: "premium",
+              type: "bool",
+              indexed: false,
+              internalType: "bool",
+            },
+            {
+              name: "value",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
         },
       ],
       inheritedFunctions: {},
+      deploymentFile: "run-1748637097.json",
+      deploymentScript: "Deploy.s.sol",
+    },
+    PrivacyMarketplace: {
+      address: "0xa15bb66138824a1c7167f5e85b957d04dd34e468",
+      abi: [
+        {
+          type: "function",
+          name: "acceptBid",
+          inputs: [
+            {
+              name: "requestId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "bidIndex",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "closeRequest",
+          inputs: [
+            {
+              name: "requestId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "getBid",
+          inputs: [
+            {
+              name: "requestId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "bidIndex",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "bidderCommitment",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
+              name: "encryptedBidMetadataCID",
+              type: "string",
+              internalType: "string",
+            },
+            {
+              name: "timestamp",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "isAccepted",
+              type: "bool",
+              internalType: "bool",
+            },
+            {
+              name: "encryptedKey",
+              type: "string",
+              internalType: "string",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "getRequest",
+          inputs: [
+            {
+              name: "requestId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "commitment",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
+              name: "encryptedCID",
+              type: "string",
+              internalType: "string",
+            },
+            {
+              name: "timestamp",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "isActive",
+              type: "bool",
+              internalType: "bool",
+            },
+            {
+              name: "bidCount",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "getTotalBids",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "getTotalRequests",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "isBidAccepted",
+          inputs: [
+            {
+              name: "requestId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "bidIndex",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "postRequest",
+          inputs: [
+            {
+              name: "commitment",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
+              name: "encryptedCID",
+              type: "string",
+              internalType: "string",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "publishEncryptedKey",
+          inputs: [
+            {
+              name: "requestId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "bidIndex",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "encryptedKey",
+              type: "string",
+              internalType: "string",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "requestCounter",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "requests",
+          inputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "commitment",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
+              name: "encryptedCID",
+              type: "string",
+              internalType: "string",
+            },
+            {
+              name: "timestamp",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "isActive",
+              type: "bool",
+              internalType: "bool",
+            },
+            {
+              name: "bidCount",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "submitBid",
+          inputs: [
+            {
+              name: "requestId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "bidderCommitment",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
+              name: "encryptedBidMetadataCID",
+              type: "string",
+              internalType: "string",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "totalBids",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "event",
+          name: "BidAccepted",
+          inputs: [
+            {
+              name: "requestId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "bidIndex",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "timestamp",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "BidSubmitted",
+          inputs: [
+            {
+              name: "requestId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "bidIndex",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "bidderCommitment",
+              type: "bytes32",
+              indexed: true,
+              internalType: "bytes32",
+            },
+            {
+              name: "encryptedBidMetadataCID",
+              type: "string",
+              indexed: false,
+              internalType: "string",
+            },
+            {
+              name: "timestamp",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "ChannelKeyPublished",
+          inputs: [
+            {
+              name: "requestId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "bidIndex",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "encryptedKey",
+              type: "string",
+              indexed: false,
+              internalType: "string",
+            },
+            {
+              name: "timestamp",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "RequestPosted",
+          inputs: [
+            {
+              name: "requestId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "commitment",
+              type: "bytes32",
+              indexed: true,
+              internalType: "bytes32",
+            },
+            {
+              name: "encryptedCID",
+              type: "string",
+              indexed: false,
+              internalType: "string",
+            },
+            {
+              name: "timestamp",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "error",
+          name: "BidAlreadyAccepted",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "BidNotFound",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "EmptyEncryptedCID",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "InvalidCommitment",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "RequestInactive",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "RequestNotFound",
+          inputs: [],
+        },
+      ],
+      inheritedFunctions: {},
+      deploymentFile: "run-1748637097.json",
+      deploymentScript: "Deploy.s.sol",
     },
   },
 } as const;
