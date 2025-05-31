@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Address, parseEther } from "viem";
 import { AddressInput, EtherInput } from "~~/components/scaffold-eth";
 import { SendUserOpParams, use4337UserOp } from "~~/hooks/k-marketplace";
@@ -16,27 +16,14 @@ export const UserOpExample = () => {
   const [usePaymaster, setUsePaymaster] = useState(false);
 
   // Initialize the 4337 hook with optional config
-  const {
-    isLoading,
-    isInitialized,
-    initializeClients,
-    sendUserOperation,
-    getUserOpReceipt,
-    checkPaymasterSupport,
-    estimateUserOpGas,
-  } = use4337UserOp({
+  const { isLoading, sendUserOperation, getUserOpReceipt, checkPaymasterSupport, estimateUserOpGas } = use4337UserOp({
     // Optional: specify custom bundler/paymaster URLs
     // bundlerUrl: "https://your-custom-bundler.com",
     // paymasterUrl: "https://your-paymaster.com",
   });
 
-  // Initialize clients on mount
-  useEffect(() => {
-    initializeClients();
-  }, [initializeClients]);
-
   const handleSendUserOp = async () => {
-    if (!targetAddress || !isInitialized) {
+    if (!targetAddress) {
       alert("Please ensure wallet is connected and enter a target address");
       return;
     }
@@ -81,14 +68,6 @@ export const UserOpExample = () => {
   return (
     <div className="flex flex-col gap-6 p-6 max-w-md mx-auto bg-base-100 rounded-box shadow-lg">
       <h2 className="text-2xl font-bold text-center">EIP-4337 User Operations</h2>
-
-      {/* Connection Status */}
-      <div className="alert alert-info">
-        <div className="flex items-center gap-2">
-          <div className={`w-3 h-3 rounded-full ${isInitialized ? "bg-green-500" : "bg-red-500"}`}></div>
-          <span>{isInitialized ? "✅ Smart Account Ready" : "❌ Initializing..."}</span>
-        </div>
-      </div>
 
       {/* Target Address Input */}
       <div className="form-control">
@@ -135,11 +114,7 @@ export const UserOpExample = () => {
 
       {/* Action Buttons */}
       <div className="flex flex-col gap-3">
-        <button
-          className="btn btn-primary"
-          onClick={handleSendUserOp}
-          disabled={isLoading || !isInitialized || !targetAddress}
-        >
+        <button className="btn btn-primary" onClick={handleSendUserOp} disabled={isLoading || !targetAddress}>
           {isLoading ? (
             <>
               <span className="loading loading-spinner loading-sm"></span>
@@ -150,11 +125,7 @@ export const UserOpExample = () => {
           )}
         </button>
 
-        <button
-          className="btn btn-secondary btn-outline"
-          onClick={handleCheckPaymasterSupport}
-          disabled={!isInitialized}
-        >
+        <button className="btn btn-secondary btn-outline" onClick={handleCheckPaymasterSupport}>
           Check Paymaster Support
         </button>
       </div>

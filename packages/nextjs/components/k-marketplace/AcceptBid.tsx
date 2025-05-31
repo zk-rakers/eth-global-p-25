@@ -28,13 +28,7 @@ export const AcceptBid = () => {
   const [encryptedChannelKey, setEncryptedChannelKey] = useState("");
 
   // Initialize 4337 hook
-  const {
-    isLoading: is4337Loading,
-    isInitialized,
-    initializeClients,
-    sendUserOperation,
-    estimateUserOpGas,
-  } = use4337UserOp();
+  const { isLoading: is4337Loading, sendUserOperation, estimateUserOpGas } = use4337UserOp();
 
   // Read request details
   const { data: requestData } = useScaffoldReadContract({
@@ -49,11 +43,6 @@ export const AcceptBid = () => {
     functionName: "getBid",
     args: requestId && bidIndex ? [BigInt(requestId), BigInt(bidIndex)] : [BigInt(0), BigInt(0)],
   });
-
-  // Initialize 4337 clients on mount
-  useEffect(() => {
-    initializeClients();
-  }, [initializeClients]);
 
   // Update request details when data changes
   useEffect(() => {
@@ -77,11 +66,6 @@ export const AcceptBid = () => {
     // Validation
     if (!requestId || !bidIndex) {
       notification.error("Please fill in request ID and bid index");
-      return;
-    }
-
-    if (!isInitialized) {
-      notification.error("Smart account not initialized. Please check your wallet connection.");
       return;
     }
 
@@ -266,14 +250,6 @@ export const AcceptBid = () => {
         <p className="text-base-content/70 mt-2">Accept bids and establish secure communication channels</p>
       </div>
 
-      {/* Connection Status */}
-      <div className="alert alert-info">
-        <div className="flex items-center gap-2">
-          <div className={`w-3 h-3 rounded-full ${isInitialized ? "bg-green-500" : "bg-red-500"}`}></div>
-          <span>{isInitialized ? "✅ Smart Account Ready" : "❌ Initializing Smart Account..."}</span>
-        </div>
-      </div>
-
       {/* Request ID Input */}
       <div className="form-control">
         <label className="label">
@@ -381,7 +357,6 @@ export const AcceptBid = () => {
         onClick={handleAcceptBid}
         disabled={
           isLoading ||
-          !isInitialized ||
           !requestId ||
           !bidIndex ||
           !requestDetails ||

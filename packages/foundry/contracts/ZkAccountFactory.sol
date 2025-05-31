@@ -13,7 +13,7 @@ import { IZKVerifier } from "./IZKVerifier.sol";
 contract ZkAccountFactory {
     IEntryPoint public immutable entryPoint;
     IZKVerifier public immutable zkVerifier;
-    
+
     error InvalidProof();
 
     constructor(IEntryPoint _entryPoint, IZKVerifier _zkVerifier) {
@@ -31,13 +31,9 @@ contract ZkAccountFactory {
      * @param salt The salt for CREATE2 deployment
      * @return ret The address of the created or existing account
      */
-    function createAccount(
-        bytes calldata proof, 
-        bytes32 root, 
-        bytes32 salt
-    ) public returns (ZkAccount ret) {
+    function createAccount(bytes calldata proof, bytes32 root, bytes32 salt) public returns (ZkAccount ret) {
         address addr = getAddress(proof, root, salt);
-        uint codeSize = addr.code.length;
+        uint256 codeSize = addr.code.length;
         if (codeSize > 0) {
             return ZkAccount(payable(addr));
         }
@@ -50,12 +46,7 @@ contract ZkAccountFactory {
 
         // Deploy the account using CREATE2
         // The ZkAccount constructor will re-validate the proof
-        ret = new ZkAccount{salt: salt}(
-            entryPoint,
-            zkVerifier,
-            proof,
-            root
-        );
+        ret = new ZkAccount{ salt: salt }(entryPoint, zkVerifier, proof, root);
     }
 
     /**
@@ -74,23 +65,18 @@ contract ZkAccountFactory {
      * @param salt The salt for CREATE2 deployment
      * @return The predicted address of the account
      */
-    function getAddress(
-        bytes calldata proof,
-        bytes32 root,
-        bytes32 salt
-    ) public view returns (address) {
+    function getAddress(bytes calldata proof, bytes32 root, bytes32 salt) public view returns (address) {
         bytes32 hash = keccak256(
             abi.encodePacked(
                 bytes1(0xff),
                 address(this),
                 salt,
-                keccak256(abi.encodePacked(
-                    type(ZkAccount).creationCode,
-                    abi.encode(entryPoint, zkVerifier, proof, root)
-                ))
+                keccak256(
+                    abi.encodePacked(type(ZkAccount).creationCode, abi.encode(entryPoint, zkVerifier, proof, root))
+                )
             )
         );
-        
+
         return address(uint160(uint256(hash)));
     }
 
