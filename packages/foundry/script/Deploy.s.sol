@@ -15,6 +15,9 @@ contract DeployScript is ScaffoldETHDeploy {
         // Deploys all your contracts sequentially
         // Add new deployments here when needed
 
+        DeployYourContract deployYourContract = new DeployYourContract();
+        deployYourContract.run();
+
         // Deploy PrivacyMarketplace contract
         DeployPrivacyMarketplace deployPrivacyMarketplace = new DeployPrivacyMarketplace();
         deployPrivacyMarketplace.run();
