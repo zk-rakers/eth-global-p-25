@@ -15,9 +15,7 @@ const AI_parent = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
   const [selectedMode, setSelectedMode] = useState(null);
-  const [currentJoke, setCurrentJoke] = useState("");
 
-  // Handle mounting state to avoid hydration issues
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -51,40 +49,24 @@ const AI_parent = () => {
             <div className="p-4">
               <h2 className="text-xl font-semibold mb-4">Welcome to AI Assistant</h2>
               <div className="space-y-4">
-                <div>
-                  <h3 className="font-medium mb-2">Key Features:</h3>
-                  <ul className="list-disc list-inside space-y-1 text-sm">
-                    <li>Service Finder (Smart Matching)</li>
-                    <li>Offer Summarizer</li>
-                    <li>Offer Comparison</li>
-                    <li>Offer Creation</li>
-                  </ul>
-                </div>
-                
                 <div className="space-y-2">
                   <button
-                    onClick={() => handleModeSelect("service-finder")}
+                    onClick={() => handleModeSelect("request")}
                     className="w-full bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
                   >
-                    Smart Service Finder
+                    Create request
                   </button>
                   <button
-                    onClick={() => handleModeSelect("listing")}
+                    onClick={() => handleModeSelect("bid")}
                     className="w-full bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
                   >
-                    Create Offer
+                    Create bid
                   </button>
                   <button
-                    onClick={() => handleModeSelect("summarize")}
+                    onClick={() => handleModeSelect("intro")}
                     className="w-full bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
                   >
-                    Summarize Offer
-                  </button>
-                  <button
-                    onClick={() => handleModeSelect("compare")}
-                    className="w-full bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
-                  >
-                    Compare Offers
+                    What is A-proof?
                   </button>
                 </div>
               </div>
