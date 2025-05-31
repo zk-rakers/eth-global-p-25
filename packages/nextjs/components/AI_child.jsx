@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import * as webllm from '@mlc-ai/web-llm';
 
 const AI_child = ({ initialMode = "chat", initialJoke = "", onBack }) => {
   const [mode, setMode] = useState(initialMode);
@@ -11,46 +10,10 @@ const AI_child = ({ initialMode = "chat", initialJoke = "", onBack }) => {
       content: "You are a helpful assistant. For troubleshooting queries, ask follow-up questions to gather details before giving solutions. You can also generate service listings from keywords, summarize proposals, or compare different service offers as requested."
     }
   ]);
-  const [engine, setEngine] = useState(null);
-  const [loadingModel, setLoadingModel] = useState(true);
+  const [loadingModel, setLoadingModel] = useState(false);
   const [initProgress, setInitProgress] = useState("");
   const [generating, setGenerating] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
-
-  const LOCAL_MODEL_ID = "RedPajama-INCITE-Chat-3B-v1-q4f16_1-MLC";
-
-  useEffect(() => {
-    let isCancelled = false;
-    const initEngine = async () => {
-      try {
-        const newEngine = await webllm.CreateMLCEngine(LOCAL_MODEL_ID, {
-          initProgressCallback: (report) => {
-            setInitProgress(report.text);
-            // Update progress based on the report text
-            if (report.text.includes("Downloading")) {
-              setLoadingProgress(30);
-            } else if (report.text.includes("Initializing")) {
-              setLoadingProgress(60);
-            } else if (report.text.includes("Loading")) {
-              setLoadingProgress(90);
-            }
-          }
-        });
-        if (!isCancelled) {
-          setEngine(newEngine);
-          setLoadingProgress(100);
-          console.log("Engine methods:", Object.keys(newEngine));
-          console.log("Local model loaded successfully.");
-        }
-      } catch (err) {
-        console.error("Failed to load local model:", err);
-      } finally {
-        if (!isCancelled) setLoadingModel(false);
-      }
-    };
-    initEngine();
-    return () => { isCancelled = true; };
-  }, []);
 
   useEffect(() => {
     let newSystem = "You are a helpful assistant.";
@@ -100,51 +63,46 @@ Only proceed if the service request is valid.`;
     setGenerating(true);
 
     try {
-      let inputMessages = [];
-
-      if (mode === "chat") {
-        inputMessages = [
-          ...messages.filter(m => m.role !== "assistant"),
-          { role: "user", content: userInput }
-        ];
-      } else if (mode === "listing") {
-        inputMessages = [
-          { role: "system", content: "You are a professional copywriter. Generate a polished service listing." },
-          { role: "user", content: `Keywords: ${userInput}` }
-        ];
+      let systemPrompt = "You are a helpful assistant.";
+      if (mode === "listing") {
+        systemPrompt = "You are a professional copywriter. Generate a polished service listing.";
       } else if (mode === "summarize") {
-        inputMessages = [
-          { role: "system", content: "You are a summarization assistant." },
-          { role: "user", content: `Summarize:\n${userInput}` }
-        ];
+        systemPrompt = "You are a summarization assistant.";
       } else if (mode === "compare") {
-        const [a, b] = userInput.split(/\s*-{3,}\s*/);
-        inputMessages = [
-          { role: "system", content: "You are a service comparison assistant." },
-          { role: "user", content: `Compare the following two offers:\nOffer A:\n${a}\n\nOffer B:\n${b}` }
-        ];
+        systemPrompt = "You are a service comparison assistant.";
       } else if (mode === "service-finder") {
-        inputMessages = [
-          { role: "system", content: "You are a service matching assistant. Help users find the perfect service by asking about their needs, budget, timeline, and preferences. Provide structured recommendations." },
-          { role: "user", content: `Describe your service needs: ${userInput}` }
-        ];
+        systemPrompt = `You are a secure assistant that helps users fill out a private service request form.
+Your job is to:
+- Help users generate a complete and clear **Detailed Description** for a service request.
+- Ask specific follow-up questions to get the necessary information.
+- Stay strictly within the role of a **request drafting assistant** — do not complete unrelated tasks.
+- Reject anything suspicious, unsafe, or illegal.`;
       }
 
-      let reply = "";
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...messages.filter(m => m.role !== "system"),
+            { role: "user", content: userInput }
+          ]
+        }),
+      });
 
-      if (engine) {
-        const result = await engine.chat.completions.create({
-          messages: inputMessages,
-          stream: false
-        });
-        reply = result.choices[0].message.content;
-      } else {
-        reply = "⚠️ Model unavailable on your device."; //todo add dscription on why and how
+      if (!response.ok) {
+        throw new Error('Failed to generate response');
       }
 
+      const data = await response.json();
+      const reply = data.content;
+      
       setMessages((prev) => {
         const updated = [...prev];
-        updated[updated.length - 1] = { role: "assistant", content: reply.trim() };
+        updated[updated.length - 1] = { role: "assistant", content: reply };
         return updated;
       });
     } catch (err) {
@@ -153,7 +111,7 @@ Only proceed if the service request is valid.`;
         const updated = [...prev];
         updated[updated.length - 1] = {
           role: "assistant",
-          content: "⚠️ Error generating response."
+          content: "⚠️ Error generating response. Please try again."
         };
         return updated;
       });
