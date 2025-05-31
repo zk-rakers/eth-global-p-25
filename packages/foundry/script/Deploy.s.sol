@@ -2,7 +2,6 @@
 pragma solidity ^0.8.19;
 
 import "./DeployHelpers.s.sol";
-// import { DeployYourContract } from "./DeployYourContract.s.sol";
 import { DeployPrivacyMarketplace } from "./DeployPrivacyMarketplace.s.sol";
 
 /**
@@ -16,8 +15,8 @@ contract DeployScript is ScaffoldETHDeploy {
         // Deploys all your contracts sequentially
         // Add new deployments here when needed
 
-        // DeployYourContract deployYourContract = new DeployYourContract();
-        // deployYourContract.run();
+        DeployYourContract deployYourContract = new DeployYourContract();
+        deployYourContract.run();
 
         // Deploy PrivacyMarketplace contract
         DeployPrivacyMarketplace deployPrivacyMarketplace = new DeployPrivacyMarketplace();
