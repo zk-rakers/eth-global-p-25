@@ -11650,9 +11650,9 @@ __metadata:
   linkType: hard
 
 "ignore@npm:^7.0.0":
-  version: 7.0.4
-  resolution: "ignore@npm:7.0.4"
-  checksum: 09b4d69192355ac066f7d99c0fdb26f52035d2eaae423bfb5f7389091d75a93bf9c105e1fbf51f557098f6d446726f29a63cef3a7d26722dc696dd345224719b
+  version: 7.0.5
+  resolution: "ignore@npm:7.0.5"
+  checksum: d0862bf64d3d58bf34d5fb0a9f725bec9ca5ce8cd1aecc8f28034269e8f69b8009ffd79ca3eda96962a6a444687781cd5efdb8c7c8ddc0a6996e36d31c217f14
   languageName: node
   linkType: hard
 
@@ -14181,7 +14181,7 @@ __metadata:
 "nan@github:JCMais/nan#fix/electron-failures":
   version: 2.22.0
   resolution: "nan@https://github.com/JCMais/nan.git#commit=0ec2eca8b2fd7518affb3945d087e393ad839b7e"
-  checksum: c40115d6f74d8141a307d4d6225eccd4681b3f7790640cfc2cdadcb3b1fa6f5a14dc41218a570b7170f28ff583bb3bfdcd673a2b548a50592a1794e1603582ad
+  checksum: c501215301d0590ab363644a1e372873c493aeb41a6d8f5b0314c3e6a2a0819900795ef73e88bccf141a256cc7dcc1b8993c2ebc6346b177b779a01aeb9e854b
   languageName: node
   linkType: hard
 
@@ -18041,7 +18041,7 @@ __metadata:
 "uWebSockets.js@uNetworking/uWebSockets.js#semver:^20":
   version: 20.52.0
   resolution: "uWebSockets.js@https://github.com/uNetworking/uWebSockets.js.git#commit=cfc9a40d8132a34881813cec3d5f8e3a185b3ce3"
-  checksum: b78d5b08d762bebb45795dfa67d63fcc80f7898036a60935834af7218ae474a844a4b16f8c15e529ca2f9d0c8db22527fc1093ea2cf4eaec42dd2191c5bc1245
+  checksum: 30113425af9f5fec28737ca894e49f7d061ff4fe7daf601f9a0422ffbdd4ae18990b639b75cc3682a2891b5fb293685b8f07ff4c45042b1e03c575b4761d70f2
   languageName: node
   linkType: hard
 
