@@ -1,6 +1,8 @@
 import { useCallback, useState } from "react";
 import { SmartAccountClient, createSmartAccountClient } from "permissionless";
+import { toSimpleSmartAccount } from "permissionless/accounts";
 import { Address, Hash, Hex, createPublicClient, http, parseEther } from "viem";
+import { entryPoint07Address } from "viem/account-abstraction";
 import { useAccount, useWalletClient } from "wagmi";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
@@ -30,7 +32,7 @@ export interface UserOpReceipt {
 
 /**
  * Hook for handling EIP-4337 user operations with permissionless.js
- * Provides functionality to sign user operations and send them to bundler
+ * Provides functionality to sign user operations and send them to bundler for meta-transactions
  */
 export const use4337UserOp = (config?: UserOpConfig) => {
   const { address } = useAccount();
@@ -57,17 +59,32 @@ export const use4337UserOp = (config?: UserOpConfig) => {
       });
       setPublicClient(client);
 
+      // Use traditional EIP-4337 smart account instead of EIP-7702
+      const simpleAccount = await toSimpleSmartAccount({
+        client,
+        // @ts-ignore
+        owner: walletClient.account,
+        entryPoint: {
+          address: entryPoint07Address,
+          version: "0.7",
+        },
+      });
+
       // Create smart account client
       const smartAccount = createSmartAccountClient({
+        account: simpleAccount,
         chain: targetNetwork,
         bundlerTransport: http(bundlerUrl),
       });
+
       setSmartAccountClient(smartAccount);
 
       return { smartAccount, publicClient: client };
     } catch (error) {
       console.error("Failed to initialize 4337 clients:", error);
       notification.error("Failed to initialize smart account clients");
+      debugger;
+
       return null;
     }
   }, [walletClient, targetNetwork, config?.bundlerUrl]);
@@ -100,6 +117,7 @@ export const use4337UserOp = (config?: UserOpConfig) => {
           ],
           maxFeePerGas: params.maxFeePerGas,
           maxPriorityFeePerGas: params.maxPriorityFeePerGas,
+          account: smartAccountClient.account,
         });
 
         notification.remove(notificationId);
