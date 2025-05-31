@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { ServiceForm } from "../components/ServiceForm";
 import {
   FaCheckCircle,
   FaCode,
@@ -15,8 +16,6 @@ import {
   FaUser,
   FaWallet,
 } from "react-icons/fa";
-
-// import ServiceForm from "../components/ServiceForm";
 
 export default function CryptoMarketplace() {
   return (
@@ -128,6 +127,9 @@ export default function CryptoMarketplace() {
           </div>
         </div>
       </section>
+
+      {/* Service Form Section */}
+      <ServiceForm />
 
       {/* Services Section */}
       <section className="py-16 bg-gray-50">
@@ -371,39 +373,29 @@ export default function CryptoMarketplace() {
             </div>
 
             <div>
-              <h3 className="text-lg font-bold mb-4">Connect With Us</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition flex items-center gap-2">
-                    <FaTwitter /> Twitter
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition flex items-center gap-2">
-                    <FaTelegram /> Telegram
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition flex items-center gap-2">
-                    <FaDiscord /> Discord
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition flex items-center gap-2">
-                    <FaGithub /> GitHub
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition flex items-center gap-2">
-                    <FaMedium /> Blog
-                  </a>
-                </li>
-              </ul>
+              <h3 className="text-lg font-bold mb-4">Connect</h3>
+              <div className="flex gap-4">
+                <a href="#" className="text-gray-400 hover:text-white transition">
+                  <FaTwitter className="text-xl" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-white transition">
+                  <FaDiscord className="text-xl" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-white transition">
+                  <FaTelegram className="text-xl" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-white transition">
+                  <FaGithub className="text-xl" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-white transition">
+                  <FaMedium className="text-xl" />
+                </a>
+              </div>
             </div>
           </div>
 
-          <div className="pt-8 border-t border-gray-800 text-center text-gray-500">
-            <p>&copy; 2023 CryptoMarket. All rights reserved.</p>
+          <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
+            <p>&copy; 2025 CryptoMarket. All rights reserved.</p>
           </div>
         </div>
       </footer>
