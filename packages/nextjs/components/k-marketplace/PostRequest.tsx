@@ -192,13 +192,14 @@ export const PostRequest = () => {
               { name: "userIdentifier", type: "bytes32", internalType: "bytes32" },
               { name: "commitment", type: "bytes32", internalType: "bytes32" },
               { name: "encryptedCID", type: "string", internalType: "string" },
+              { name: "title", type: "string", internalType: "string" },
             ],
             outputs: [],
             stateMutability: "nonpayable",
           },
         ],
         functionName: "postRequest",
-        args: [userIdentifier, commitment, encryptedCID],
+        args: [userIdentifier, commitment, encryptedCID, formData.title],
       });
 
       notification.remove(notificationId);

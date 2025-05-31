@@ -52,6 +52,7 @@ contract PrivacyMarketplace {
         bytes32 indexed userIdentifier,
         bytes32 indexed commitment,
         string encryptedCID,
+        string title,
         uint256 timestamp
     );
 
@@ -93,7 +94,8 @@ contract PrivacyMarketplace {
     function postRequest(
         bytes32 userIdentifier,
         bytes32 commitment,
-        string calldata encryptedCID
+        string calldata encryptedCID,
+        string calldata title
     ) external {
         if (userIdentifier == bytes32(0)) revert InvalidCommitment();
         if (commitment == bytes32(0)) revert InvalidCommitment();
@@ -111,7 +113,7 @@ contract PrivacyMarketplace {
 
         userRequests[userIdentifier].push(requestId);
 
-        emit RequestPosted(requestId, userIdentifier, commitment, encryptedCID, block.timestamp);
+        emit RequestPosted(requestId, userIdentifier, commitment, encryptedCID, title, block.timestamp);
     }
 
     /**
