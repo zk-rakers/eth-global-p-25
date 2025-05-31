@@ -9,19 +9,6 @@ const AI_child = dynamic(() => import('./AI_child'), {
   loading: () => <div className="p-4 text-center">Loading AI Assistant...</div>
 });
 
-// List of jokes to show during model loading
-const LOADING_JOKES = [
-  "Why don't scientists trust atoms? Because they make up everything!",
-  "I told my computer I needed a break, and now it won't stop sending me vacation ads.",
-  "Why did the AI assistant go to therapy? It had too many processing issues!",
-  "What do you call a computer that sings? A Dell!",
-  "Why was the math book sad? Because it had too many problems!",
-  "I asked my AI to help me write a joke, but it said it was too artificial for that.",
-  "Why did the programmer quit their job? Because they didn't get arrays!",
-  "What do you call a fake noodle? An impasta!",
-  "Why did the AI cross the road? To get to the other side of the algorithm!",
-  "I tried to make a joke about AI, but it was too machine-ical!"
-];
 
 const AI_parent = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -35,23 +22,12 @@ const AI_parent = () => {
     setIsMounted(true);
   }, []);
 
-  // Select a random joke when mode is selected
-  useEffect(() => {
-    if (selectedMode && !showIntro) {
-      const randomJoke = LOADING_JOKES[Math.floor(Math.random() * LOADING_JOKES.length)];
-      setCurrentJoke(randomJoke);
-    }
-  }, [selectedMode, showIntro]);
-
-  if (!isMounted) return null;
-
   const handleModeSelect = (mode) => {
     setSelectedMode(mode);
     setShowIntro(false);
-    // Select a random joke when mode is selected
-    const randomJoke = LOADING_JOKES[Math.floor(Math.random() * LOADING_JOKES.length)];
-    setCurrentJoke(randomJoke);
   };
+
+  if (!isMounted) return null;
 
   const handleBack = () => {
     setShowIntro(true);
@@ -84,12 +60,7 @@ const AI_parent = () => {
                     <li>Offer Creation</li>
                   </ul>
                 </div>
-                <div className="bg-blue-50 p-3 rounded">
-                  <p className="text-sm text-blue-800">
-                    <strong>Privacy First:</strong> The AI model will be installed locally in your browser. 
-                    This may take a few moments and requires some storage space, but ensures your data stays private.
-                  </p>
-                </div>
+                
                 <div className="space-y-2">
                   <button
                     onClick={() => handleModeSelect("service-finder")}
@@ -121,7 +92,6 @@ const AI_parent = () => {
           ) : (
             <AI_child
               initialMode={selectedMode}
-              initialJoke={currentJoke}
               onBack={handleBack}
             />
           )}
