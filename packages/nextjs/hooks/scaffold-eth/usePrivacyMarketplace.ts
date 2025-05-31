@@ -27,6 +27,7 @@ export function usePrivacyMarketplace() {
 
         const tx = await postRequest({
           functionName: "postRequest",
+          // @ts-ignore
           args: [formattedHash as `0x${string}`, ipfsHash as `0x${string}`],
         });
 

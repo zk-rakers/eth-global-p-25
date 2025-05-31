@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     PrivacyMarketplace: {
-      address: "0x700b6a60ce7eaaea56f065753d8dcb9653dbad35",
+      address: "0x0c8e79f3534b00d9a3d4a856b665bf4ebc22f2ba",
       abi: [
         {
           type: "function",
@@ -96,6 +96,11 @@ const deployedContracts = {
           ],
           outputs: [
             {
+              name: "userIdentifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
               name: "commitment",
               type: "bytes32",
               internalType: "bytes32",
@@ -151,6 +156,56 @@ const deployedContracts = {
         },
         {
           type: "function",
+          name: "getUserBids",
+          inputs: [
+            {
+              name: "userIdentifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "tuple[]",
+              internalType: "struct PrivacyMarketplace.BidReference[]",
+              components: [
+                {
+                  name: "requestId",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "bidIndex",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+              ],
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "getUserRequests",
+          inputs: [
+            {
+              name: "userIdentifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "uint256[]",
+              internalType: "uint256[]",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
           name: "isBidAccepted",
           inputs: [
             {
@@ -178,12 +233,22 @@ const deployedContracts = {
           name: "postRequest",
           inputs: [
             {
+              name: "userIdentifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
               name: "commitment",
               type: "bytes32",
               internalType: "bytes32",
             },
             {
               name: "encryptedCID",
+              type: "string",
+              internalType: "string",
+            },
+            {
+              name: "title",
               type: "string",
               internalType: "string",
             },
@@ -239,6 +304,11 @@ const deployedContracts = {
           ],
           outputs: [
             {
+              name: "userIdentifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
               name: "commitment",
               type: "bytes32",
               internalType: "bytes32",
@@ -276,6 +346,11 @@ const deployedContracts = {
               internalType: "uint256",
             },
             {
+              name: "userIdentifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
               name: "bidderCommitment",
               type: "bytes32",
               internalType: "bytes32",
@@ -293,6 +368,59 @@ const deployedContracts = {
           type: "function",
           name: "totalBids",
           inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "userBids",
+          inputs: [
+            {
+              name: "",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "requestId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "bidIndex",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "userRequests",
+          inputs: [
+            {
+              name: "",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
           outputs: [
             {
               name: "",
@@ -344,9 +472,15 @@ const deployedContracts = {
               internalType: "uint256",
             },
             {
-              name: "bidderCommitment",
+              name: "userIdentifier",
               type: "bytes32",
               indexed: true,
+              internalType: "bytes32",
+            },
+            {
+              name: "bidderCommitment",
+              type: "bytes32",
+              indexed: false,
               internalType: "bytes32",
             },
             {
@@ -406,6 +540,12 @@ const deployedContracts = {
               internalType: "uint256",
             },
             {
+              name: "userIdentifier",
+              type: "bytes32",
+              indexed: true,
+              internalType: "bytes32",
+            },
+            {
               name: "commitment",
               type: "bytes32",
               indexed: true,
@@ -413,6 +553,12 @@ const deployedContracts = {
             },
             {
               name: "encryptedCID",
+              type: "string",
+              indexed: false,
+              internalType: "string",
+            },
+            {
+              name: "title",
               type: "string",
               indexed: false,
               internalType: "string",
@@ -458,11 +604,11 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1748713399.json",
+      deploymentFile: "run-1748715381.json",
       deploymentScript: "Deploy.s.sol",
     },
     ZkAccountFactory: {
-      address: "0xe1da8919f262ee86f9be05059c9280142cf23f48",
+      address: "0x196dbcbb54b8ec4958c959d8949ebfe87ac2aaaf",
       abi: [
         {
           type: "constructor",
@@ -619,7 +765,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1748713399.json",
+      deploymentFile: "run-1748715381.json",
       deploymentScript: "Deploy.s.sol",
     },
   },
