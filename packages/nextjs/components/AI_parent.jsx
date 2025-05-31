@@ -39,7 +39,7 @@ const AI_parent = () => {
       {/* Floating button to toggle assistant */}
       <button
         onClick={() => setIsVisible(!isVisible)}
-        className="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-blue-700 transition-colors z-50"
+        className="fixed bottom-4 right-4 bg-black text-white px-4 py-2 rounded-full shadow-lg hover:bg-gray-800 transition-colors z-50"
       >
         AI Assistant
       </button>
@@ -64,25 +64,25 @@ const AI_parent = () => {
                 <div className="space-y-2">
                   <button
                     onClick={() => handleModeSelect("service-finder")}
-                    className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+                    className="w-full bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
                   >
                     Smart Service Finder
                   </button>
                   <button
                     onClick={() => handleModeSelect("listing")}
-                    className="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
+                    className="w-full bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
                   >
                     Create Offer
                   </button>
                   <button
                     onClick={() => handleModeSelect("summarize")}
-                    className="w-full bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors"
+                    className="w-full bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
                   >
                     Summarize Offer
                   </button>
                   <button
                     onClick={() => handleModeSelect("compare")}
-                    className="w-full bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700 transition-colors"
+                    className="w-full bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
                   >
                     Compare Offers
                   </button>
@@ -90,10 +90,12 @@ const AI_parent = () => {
               </div>
             </div>
           ) : (
-            <AI_child
-              initialMode={selectedMode}
-              onBack={handleBack}
-            />
+            <div>
+              <AI_child
+                initialMode={selectedMode}
+                onBack={handleBack}
+              />
+            </div>
           )}
         </div>
       )}
