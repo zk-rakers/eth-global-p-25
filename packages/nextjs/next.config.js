@@ -63,4 +63,4 @@ const nextConfig = {
   output: 'export',
 };
 
-module.exports = nextConfig; /** @type {import('next').NextConfig} */
+module.exports = nextConfig;

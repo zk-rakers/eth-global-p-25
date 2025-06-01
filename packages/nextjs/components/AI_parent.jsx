@@ -9,7 +9,6 @@ const AI_child = dynamic(() => import('./AI_child'), {
   loading: () => <div className="p-4 text-center">Loading AI Assistant...</div>
 });
 
-
 const AI_parent = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isMounted, setIsMounted] = useState(false);

@@ -70,6 +70,17 @@ Any specific requirements or preferences?`
     }
   }, [mode]);
 
+  // Add initial joke to messages when component mounts
+  useEffect(() => {
+    if (initialJoke) {
+      setMessages(prev => [
+        ...prev,
+        { role: "assistant", content: "While I'm getting ready, here's a joke to keep you entertained:" },
+        { role: "assistant", content: initialJoke }
+      ]);
+    }
+  }, [initialJoke]);
+
   const handleSend = async (userInput) => {
     if (!userInput || generating) return;
 
@@ -322,6 +333,15 @@ Your job is to:
 
       {mode === "service-finder" && (
         <div className="p-2 space-y-2">
+          <div className="bg-blue-50 p-2 rounded text-sm">
+            <p className="text-blue-800 mb-2">Let's create a detailed service request together!</p>
+            <ul className="list-disc list-inside text-xs text-blue-700">
+              <li>What type of service do you need?</li>
+              <li>When do you need it completed?</li>
+              <li>What's your budget range?</li>
+              <li>Any specific requirements or preferences?</li>
+            </ul>
+          </div>
           <textarea
             rows="3"
             placeholder="Describe your service needs (e.g., 'I need a plumber to fix a leaking kitchen sink. The sink is stainless steel, about 2 years old. I need it fixed within 24 hours if possible.')"
