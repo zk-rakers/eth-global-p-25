@@ -30,8 +30,8 @@ contract MockZKVerifier is IZKVerifier {
         defaultVerifyResult = result;
     }
 
-    function verify(bytes calldata proof, bytes32 root) external view override returns (bool) {
-        bytes32 key = keccak256(abi.encodePacked(proof, root));
+    function verify(Proof calldata proof, bytes32 _nullifier) external view override returns (bool) {
+        bytes32 key = keccak256(abi.encodePacked(proof.seal.seal, _nullifier));
         
         // If this specific proof/root combination was explicitly set, use that value
         if (proofSet[key]) {
@@ -84,6 +84,17 @@ contract DeployZkAccountFactory is ScaffoldETHDeploy {
     // Official EntryPoint contract addresses for different networks
     // You can update these addresses based on the latest ERC-4337 deployments
     mapping(uint256 => address) public officialEntryPoints;
+
+    address public pubkeyVerifier;
+
+    constructor(
+        address _pubkeyVerifier
+    ) {
+        pubkeyVerifier = _pubkeyVerifier;
+
+        // Initialize official EntryPoint addresses
+        _initializeEntryPointAddresses();
+    }
     
     function run() external ScaffoldEthDeployerRunner {
         // Initialize official EntryPoint addresses
@@ -96,7 +107,7 @@ contract DeployZkAccountFactory is ScaffoldETHDeploy {
         IZKVerifier zkVerifier = _deployZKVerifier();
         
         // Deploy ZkAccountFactory
-        ZkAccountFactory zkAccountFactory = new ZkAccountFactory(entryPoint, zkVerifier);
+        ZkAccountFactory zkAccountFactory = new ZkAccountFactory(zkVerifier);
         
         console.logString(string.concat("ZkAccountFactory deployed at: ", vm.toString(address(zkAccountFactory))));
         console.logString(string.concat("EntryPoint used: ", vm.toString(address(entryPoint))));
@@ -160,11 +171,9 @@ contract DeployZkAccountFactory is ScaffoldETHDeploy {
             console.logString("Deployed MockZKVerifier for local development");
             // Set some default valid proofs for testing
             _setupTestProofs(mockVerifier);
-        } else {
-            console.logString("WARNING: Using MockZKVerifier. Replace with real ZK verifier for production!");
-        }
-        
-        return IZKVerifier(address(mockVerifier));
+        }        
+
+        return IZKVerifier(pubkeyVerifier);
     }
     
     function _setupTestProofs(MockZKVerifier mockVerifier) private {

@@ -7,14 +7,19 @@ import "../contracts/ZkAccount.sol";
 import "../contracts/IZKVerifier.sol";
 import "@account-abstraction/contracts/interfaces/IEntryPoint.sol";
 
+import {Proof} from "vlayer-0.1.0/Proof.sol";
+import {CallAssumptions} from "vlayer-0.1.0/CallAssumptions.sol";
+import {Seal} from "vlayer-0.1.0/Seal.sol";
+import {ProofMode} from "vlayer-0.1.0/Seal.sol";
+
 // Mock ZK Verifier for testing
 contract MockZKVerifier is IZKVerifier {
     mapping(bytes32 => bool) public validProofs;
     mapping(bytes32 => bool) public proofSet;
     bool public defaultVerifyResult = true;
 
-    function setProofValid(bytes memory proof, bytes32 root, bool isValid) external {
-        bytes32 key = keccak256(abi.encodePacked(proof, root));
+    function setProofValid(Proof calldata proof, bytes32 root, bool isValid) external {
+        bytes32 key = keccak256(abi.encodePacked(proof.seal.seal, root));
         validProofs[key] = isValid;
         proofSet[key] = true;
     }
@@ -23,8 +28,8 @@ contract MockZKVerifier is IZKVerifier {
         defaultVerifyResult = result;
     }
 
-    function verify(bytes calldata proof, bytes32 root) external view override returns (bool) {
-        bytes32 key = keccak256(abi.encodePacked(proof, root));
+    function verify(Proof calldata proof, bytes32 root) external view override returns (bool) {
+        bytes32 key = keccak256(abi.encodePacked(proof.seal.seal, root));
         // If this specific proof/root combination was explicitly set, use that value
         if (proofSet[key]) {
             return validProofs[key];
@@ -36,15 +41,15 @@ contract MockZKVerifier is IZKVerifier {
 
 // Simplified Mock EntryPoint for testing
 contract MockEntryPoint {
-    function getUserOpHash(PackedUserOperation calldata) external view returns (bytes32) {
+    function getUserOpHash(PackedUserOperation calldata) external pure returns (bytes32) {
         return bytes32(0);
     }
 
-    function getNonce(address, uint192) external view returns (uint256) {
+    function getNonce(address, uint192) external pure returns (uint256) {
         return 0;
     }
 
-    function balanceOf(address) external view returns (uint256) {
+    function balanceOf(address) external pure returns (uint256) {
         return 0;
     }
 }
@@ -55,8 +60,19 @@ contract ZkAccountFactoryTest is Test {
     MockEntryPoint public mockEntryPoint;
 
     // Test data
-    bytes public validProof = abi.encodePacked("valid_proof_data");
-    bytes public invalidProof = abi.encodePacked("invalid_proof_data");
+    Proof public validProof = Proof(
+        Seal(bytes4(0), [bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0)], ProofMode.GROTH16),
+        bytes32(0),
+        0,
+        CallAssumptions(address(0), 0, 0, 0, 0)
+    );
+    Proof public invalidProof = Proof(
+        Seal(bytes4(0), [bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0)], ProofMode.GROTH16),
+        bytes32(0),
+        0,
+        CallAssumptions(address(0), 0, 0, 0, 0)
+    );
+
     bytes32 public validRoot = keccak256(abi.encodePacked("valid_merkle_root"));
     bytes32 public invalidRoot = keccak256(abi.encodePacked("invalid_merkle_root"));
     bytes32 public testSalt = keccak256(abi.encodePacked("test_salt"));
@@ -85,7 +101,7 @@ contract ZkAccountFactoryTest is Test {
         mockVerifier.setProofValid(invalidProof, invalidRoot, false);
     }
 
-    function testFactoryDeployment() public {
+    function testFactoryDeployment() public view {
         // Test that factory was deployed with correct parameters
         assertEq(address(factory.entryPoint()), address(mockEntryPoint));
         assertEq(address(factory.zkVerifier()), address(mockVerifier));
@@ -188,7 +204,12 @@ contract ZkAccountFactoryTest is Test {
         bytes32 salt1 = keccak256(abi.encodePacked("salt1"));
         bytes32 salt2 = keccak256(abi.encodePacked("salt2"));
         bytes32 root2 = keccak256(abi.encodePacked("different_root"));
-        bytes memory proof2 = abi.encodePacked("different_proof");
+        Proof memory proof2 = Proof(
+            Seal(bytes4(0), [bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0)], ProofMode.GROTH16),
+            bytes32(0),
+            0,
+            CallAssumptions(address(0), 0, 0, 0, 0)
+        );
 
         address addr1 = factory.getAddress(validProof, validRoot, salt1);
         address addr2 = factory.getAddress(validProof, validRoot, salt2);
@@ -287,10 +308,10 @@ contract ZkAccountFactoryTest is Test {
         assertGt(gasUsed, 100_000); // But more than 100k gas (deployment cost)
     }
 
-    function testFuzzCreateAccount(bytes memory fuzzProof, bytes32 fuzzRoot, bytes32 fuzzSalt) public {
+    function testFuzzCreateAccount(Proof memory fuzzProof, bytes32 fuzzRoot, bytes32 fuzzSalt) public {
         // Assume the fuzzed inputs are different from our valid ones to avoid conflicts
         vm.assume(
-            keccak256(abi.encodePacked(fuzzProof, fuzzRoot)) != keccak256(abi.encodePacked(validProof, validRoot))
+            keccak256(abi.encodePacked(fuzzProof.seal.seal, fuzzRoot)) != keccak256(abi.encodePacked(validProof.seal.seal, validRoot))
         );
 
         // Set the fuzzed proof as invalid by default
@@ -301,7 +322,7 @@ contract ZkAccountFactoryTest is Test {
         factory.createAccount(fuzzProof, fuzzRoot, fuzzSalt);
     }
 
-    function testFuzzGetAddress(bytes memory fuzzProof, bytes32 fuzzRoot, bytes32 fuzzSalt) public view {
+    function testFuzzGetAddress(Proof memory fuzzProof, bytes32 fuzzRoot, bytes32 fuzzSalt) public view {
         // getAddress should always return a valid address, regardless of inputs
         address predicted = factory.getAddress(fuzzProof, fuzzRoot, fuzzSalt);
 

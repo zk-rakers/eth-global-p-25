@@ -5,9 +5,9 @@ import { createPimlicoClient } from "permissionless/clients/pimlico";
 import { Address, Hash, Hex, createPublicClient, http } from "viem";
 import { entryPoint07Address } from "viem/account-abstraction";
 import { useAccount, useWalletClient } from "wagmi";
-import { useTargetNetwork } from "~~/hooks/scaffold-eth";
+import { useDeployedContractInfo, useScaffoldContract, useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
-import { notification } from "~~/utils/scaffold-eth";
+import { AllowedChainIds, notification } from "~~/utils/scaffold-eth";
 
 export interface UserOpConfig {
   bundlerUrl?: string;
@@ -67,17 +67,14 @@ export const use4337UserOp = (config?: UserOpConfig) => {
     functionName: "entryPoint",
   });
 
-  const { data: AAFactory } = useScaffoldReadContract({
+  const { data: zkAccountFactory } = useScaffoldContract({
     contractName: "ZkAccountFactory",
-    functionName: "getAddress",
-    args: [
-      "0x31",
-      "0x6100000000000000000000000000000000000000000000000000000000000000",
-      "0x6100000000000000000000000000000000000000000000000000000000000000",
-    ],
   });
 
-  console.log("AAFactory", AAFactory);
+  const { data: deployedContractData } = useDeployedContractInfo({
+    contractName: "ZkAccount",
+    chainId: targetNetwork?.id as AllowedChainIds,
+  });
 
   // Create pimlico client (combines bundler and paymaster)
   const createPimlicoClientInstance = useCallback(() => {
@@ -91,13 +88,26 @@ export const use4337UserOp = (config?: UserOpConfig) => {
   }, [bundlerUrl]);
 
   // Create smart account from wallet client
-  const createSmartAccount = useCallback(async () => {
+  const createSmartAccount = useCallback(async (
+    proof: string,
+    root: string,
+    salt: string,
+  ) => {
+    if (!zkAccountFactory) {
+      notification.error("ZkAccountFactory not found");
+      throw new Error("ZkAccountFactory not found");
+    }
+
     console.log("walletClient", account);
 
     const publicClient = createPublicClient({
       transport: http(),
       chain: targetNetwork,
     });
+
+    const AAFactory = await zkAccountFactory.read.getAddress([proof, root, salt]);
+
+    debugger;
 
     // Create smart account based on type
     switch (accountType) {
@@ -119,20 +129,24 @@ export const use4337UserOp = (config?: UserOpConfig) => {
           client: publicClient,
           // @ts-ignore
           owner: walletClient,
-          address: "0xD079dc57F1AA1ff4b5eBB3308A7b809FEA49D1De", // hardcoded
+          address: deployedContractData?.address, // hardcoded
           factoryAddress: AAFactory,
           entryPoint: {
-            address: "0xA15BB66138824a1c7167f5E85b957d04Dd34E468",
+            address: entryPoint07Address,
             version: "0.7",
           },
         });
     }
-  }, [walletClient, targetNetwork, accountType, account]);
+  }, [walletClient, targetNetwork, accountType, account, deployedContractData, zkAccountFactory]);
 
   // Initialize smart account client
-  const initializeSmartAccountClient = useCallback(async () => {
+  const initializeSmartAccountClient = useCallback(async (
+    proof: string,
+    root: string,
+    salt: string,
+  ) => {
     try {
-      const smartAccount = await createSmartAccount();
+      const smartAccount = await createSmartAccount(proof, root, salt);
       const pimlicoClient = createPimlicoClientInstance();
 
       const client = createSmartAccountClient({
@@ -158,23 +172,6 @@ export const use4337UserOp = (config?: UserOpConfig) => {
       throw error;
     }
   }, [createSmartAccount, createPimlicoClientInstance, targetNetwork, bundlerUrl]);
-
-  // Get deterministic account address
-  const getDeterministicAddress = useCallback(async (): Promise<Address | null> => {
-    if (!address) {
-      notification.error("No wallet address available");
-      return null;
-    }
-
-    try {
-      const smartAccount = await createSmartAccount();
-      return smartAccount.address;
-    } catch (error) {
-      console.error("Failed to get deterministic address:", error);
-      notification.error("Failed to get deterministic address");
-      return null;
-    }
-  }, [address, createSmartAccount]);
 
   const { address: connectedAddress } = useAccount();
 
@@ -218,25 +215,6 @@ export const use4337UserOp = (config?: UserOpConfig) => {
 
         const result: UserOpReceipt = {
           userOpHash,
-          //   data: encodeFunctionData({
-          //     abi: [
-          //       {
-          //         name: "postRequest",
-          //         type: "function",
-          //         inputs: [
-          //           {
-          //             name: "commitment",
-          //             type: "bytes32",
-          //           },
-          //           {
-          //             name: "encryptedCID",
-          //             type: "string",
-          //           },
-          //         ],
-          //       },
-          //     ],
-          //     args: [randomCommitment, randomEncryptedCID],
-          //   }),
           transactionHash: receipt.transactionHash,
           success: receipt.success,
           actualGasUsed: receipt.actualGasUsed,
@@ -325,7 +303,6 @@ export const use4337UserOp = (config?: UserOpConfig) => {
     smartAccountClient,
 
     // Core actions
-    getDeterministicAddress,
     sendUserOperation,
     estimateUserOpGas,
     getUserOpReceipt,

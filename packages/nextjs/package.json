@@ -26,6 +26,7 @@
     "@types/axios": "^0.14.4",
     "@uniswap/sdk-core": "~5.8.2",
     "@uniswap/v2-sdk": "~4.6.1",
+    "@vlayer/sdk": "^1.0.2-nightly-20250530-3f01bfdcfb6b20d608f7bcef25f9907164ad3966",
     "blo": "~1.2.0",
     "buffer": "^6.0.3",
     "burner-connector": "0.0.14",

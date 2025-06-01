@@ -6,6 +6,7 @@ import "@account-abstraction/contracts/core/UserOperationLib.sol";
 import "@account-abstraction/contracts/core/BaseAccount.sol";
 
 import { IZKVerifier } from "./IZKVerifier.sol";
+import {Proof} from "vlayer-0.1.0/Proof.sol";
 
 contract ZkAccount is BaseAccount {
     using UserOperationLib for PackedUserOperation;
@@ -15,7 +16,7 @@ contract ZkAccount is BaseAccount {
 
     bytes32 public immutable verifiedRoot; // can be a merkle root or other public anchor
 
-    constructor(IEntryPoint anEntryPoint, IZKVerifier _zkVerifier, bytes memory proof, bytes32 publicInput) {
+    constructor(IEntryPoint anEntryPoint, IZKVerifier _zkVerifier, Proof memory proof, bytes32 publicInput) {
         require(_zkVerifier.verify(proof, publicInput), "Invalid proof");
 
         _entryPoint = anEntryPoint;
@@ -30,11 +31,10 @@ contract ZkAccount is BaseAccount {
 
     function _validateSignature(PackedUserOperation calldata userOp, bytes32 /* userOpHash */ )
         internal
-        view
         override
         returns (uint256 validationData)
     {
-        (bytes memory proof, bytes32 publicInput) = abi.decode(userOp.initCode, (bytes, bytes32));
+        (Proof memory proof, bytes32 publicInput) = abi.decode(userOp.signature, (Proof, bytes32));
 
         if (publicInput != verifiedRoot) {
             return 1; // SIG_VALIDATION_FAILED
