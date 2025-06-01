@@ -30,8 +30,8 @@ contract MockZKVerifier is IZKVerifier {
         defaultVerifyResult = result;
     }
 
-    function verify(bytes calldata proof, bytes32 root) external view override returns (bool) {
-        bytes32 key = keccak256(abi.encodePacked(proof, root));
+    function verify(Proof calldata proof, bytes32 _nullifier) external view override returns (bool) {
+        bytes32 key = keccak256(abi.encodePacked(proof.seal.seal, _nullifier));
         
         // If this specific proof/root combination was explicitly set, use that value
         if (proofSet[key]) {
@@ -84,6 +84,20 @@ contract DeployZkAccountFactory is ScaffoldETHDeploy {
     // Official EntryPoint contract addresses for different networks
     // You can update these addresses based on the latest ERC-4337 deployments
     mapping(uint256 => address) public officialEntryPoints;
+
+    IZKVerifier public pubkeyVerifier;
+    address public pubkeyProver;
+
+    constructor(
+        IZKVerifier _pubkeyVerifier,
+        address _pubkeyProver
+    ) {
+        pubkeyVerifier = _pubkeyVerifier;
+        pubkeyProver = _pubkeyProver;
+
+        // Initialize official EntryPoint addresses
+        _initializeEntryPointAddresses();
+    }
     
     function run() external ScaffoldEthDeployerRunner {
         // Initialize official EntryPoint addresses

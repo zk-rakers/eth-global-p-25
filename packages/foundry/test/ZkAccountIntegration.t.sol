@@ -8,6 +8,11 @@ import "../contracts/IZKVerifier.sol";
 import "@account-abstraction/contracts/interfaces/IEntryPoint.sol";
 import "@account-abstraction/contracts/core/UserOperationLib.sol";
 
+import {Proof} from "vlayer-0.1.0/Proof.sol";
+import {CallAssumptions} from "vlayer-0.1.0/CallAssumptions.sol";
+import {Seal} from "vlayer-0.1.0/Seal.sol";
+import {ProofMode} from "vlayer-0.1.0/Seal.sol";
+
 // Enhanced Mock ZK Verifier for integration testing
 contract EnhancedMockZKVerifier is IZKVerifier {
     mapping(bytes32 => bool) public validProofs;
@@ -22,8 +27,8 @@ contract EnhancedMockZKVerifier is IZKVerifier {
     bytes32 public lastRoot;
     bool public lastResult;
 
-    function setProofValid(bytes memory proof, bytes32 root, bool isValid) external {
-        bytes32 key = keccak256(abi.encodePacked(proof, root));
+    function setProofValid(Proof calldata proof, bytes32 root, bool isValid) external {
+        bytes32 key = keccak256(abi.encodePacked(proof.seal.seal, root));
         validProofs[key] = isValid;
         proofSet[key] = true;
     }
@@ -32,8 +37,8 @@ contract EnhancedMockZKVerifier is IZKVerifier {
         defaultVerifyResult = result;
     }
 
-    function verify(bytes calldata proof, bytes32 root) external view override returns (bool) {
-        bytes32 key = keccak256(abi.encodePacked(proof, root));
+    function verify(Proof calldata proof, bytes32 root) external view override returns (bool) {
+        bytes32 key = keccak256(abi.encodePacked(proof.seal.seal, root));
 
         if (proofSet[key]) {
             return validProofs[key];
@@ -43,9 +48,9 @@ contract EnhancedMockZKVerifier is IZKVerifier {
     }
 
     // Separate function to emit events for testing
-    function verifyWithEvent(bytes calldata proof, bytes32 root) external returns (bool) {
+    function verifyWithEvent(Proof calldata proof, bytes32 root) external returns (bool) {
         bool result = this.verify(proof, root);
-        emit ProofVerified(proof, root, result);
+        emit ProofVerified(abi.encode(proof), root, result);
         return result;
     }
 }
@@ -98,7 +103,7 @@ contract ZkAccountIntegrationTest is Test {
     address public attacker;
 
     struct UserTestData {
-        bytes proof;
+        Proof proof;
         bytes32 root;
         bytes32 salt;
         ZkAccount account;
@@ -136,7 +141,12 @@ contract ZkAccountIntegrationTest is Test {
     function _setupUserData(address user, string memory proofStr, string memory rootStr, string memory saltStr)
         internal
     {
-        userData[user].proof = abi.encodePacked(proofStr);
+        userData[user].proof = Proof(
+            Seal(bytes4(0), [bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0)], ProofMode.GROTH16),
+            bytes32(0),
+            0,
+            CallAssumptions(address(0), 0, 0, 0, 0)
+        );
         userData[user].root = keccak256(abi.encodePacked(rootStr));
         userData[user].salt = keccak256(abi.encodePacked(saltStr));
 
@@ -472,17 +482,17 @@ contract ZkAccountIntegrationTest is Test {
         assertEq(entryPoint.getNonce(address(aliceAccount), 0), 1);
     }
 
-    function testFuzzIntegration(bytes memory fuzzProof, bytes32 fuzzRoot, bytes32 fuzzSalt) public {
+    function testFuzzIntegration(Proof memory fuzzProof, bytes32 fuzzRoot, bytes32 fuzzSalt) public {
         // Skip if the fuzzed values match any of our valid setups
-        vm.assume(fuzzProof.length > 0);
-        vm.assume(fuzzProof.length < 1000);
+        vm.assume(fuzzProof.seal.seal.length > 0);
+        vm.assume(fuzzProof.seal.seal.length < 1000);
         vm.assume(
-            keccak256(abi.encodePacked(fuzzProof, fuzzRoot))
-                != keccak256(abi.encodePacked(userData[alice].proof, userData[alice].root))
+            keccak256(abi.encodePacked(fuzzProof.seal.seal, fuzzRoot))
+                != keccak256(abi.encodePacked(userData[alice].proof.seal.seal, userData[alice].root))
         );
         vm.assume(
-            keccak256(abi.encodePacked(fuzzProof, fuzzRoot))
-                != keccak256(abi.encodePacked(userData[bob].proof, userData[bob].root))
+            keccak256(abi.encodePacked(fuzzProof.seal.seal, fuzzRoot))
+                != keccak256(abi.encodePacked(userData[bob].proof.seal.seal, userData[bob].root))
         );
 
         // Set fuzzed proof as invalid

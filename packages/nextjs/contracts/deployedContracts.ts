@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     PrivacyMarketplace: {
-      address: "0x700b6a60ce7eaaea56f065753d8dcb9653dbad35",
+      address: "0xf7cd8fa9b94db2aa972023b379c7f72c65e4de9d",
       abi: [
         {
           type: "function",
@@ -96,6 +96,11 @@ const deployedContracts = {
           ],
           outputs: [
             {
+              name: "userIdentifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
               name: "commitment",
               type: "bytes32",
               internalType: "bytes32",
@@ -151,6 +156,56 @@ const deployedContracts = {
         },
         {
           type: "function",
+          name: "getUserBids",
+          inputs: [
+            {
+              name: "userIdentifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "tuple[]",
+              internalType: "struct PrivacyMarketplace.BidReference[]",
+              components: [
+                {
+                  name: "requestId",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "bidIndex",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+              ],
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "getUserRequests",
+          inputs: [
+            {
+              name: "userIdentifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "uint256[]",
+              internalType: "uint256[]",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
           name: "isBidAccepted",
           inputs: [
             {
@@ -178,12 +233,22 @@ const deployedContracts = {
           name: "postRequest",
           inputs: [
             {
+              name: "userIdentifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
               name: "commitment",
               type: "bytes32",
               internalType: "bytes32",
             },
             {
               name: "encryptedCID",
+              type: "string",
+              internalType: "string",
+            },
+            {
+              name: "title",
               type: "string",
               internalType: "string",
             },
@@ -239,6 +304,11 @@ const deployedContracts = {
           ],
           outputs: [
             {
+              name: "userIdentifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
               name: "commitment",
               type: "bytes32",
               internalType: "bytes32",
@@ -276,6 +346,11 @@ const deployedContracts = {
               internalType: "uint256",
             },
             {
+              name: "userIdentifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
               name: "bidderCommitment",
               type: "bytes32",
               internalType: "bytes32",
@@ -293,6 +368,59 @@ const deployedContracts = {
           type: "function",
           name: "totalBids",
           inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "userBids",
+          inputs: [
+            {
+              name: "",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "requestId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "bidIndex",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "userRequests",
+          inputs: [
+            {
+              name: "",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
           outputs: [
             {
               name: "",
@@ -344,9 +472,15 @@ const deployedContracts = {
               internalType: "uint256",
             },
             {
-              name: "bidderCommitment",
+              name: "userIdentifier",
               type: "bytes32",
               indexed: true,
+              internalType: "bytes32",
+            },
+            {
+              name: "bidderCommitment",
+              type: "bytes32",
+              indexed: false,
               internalType: "bytes32",
             },
             {
@@ -406,6 +540,12 @@ const deployedContracts = {
               internalType: "uint256",
             },
             {
+              name: "userIdentifier",
+              type: "bytes32",
+              indexed: true,
+              internalType: "bytes32",
+            },
+            {
               name: "commitment",
               type: "bytes32",
               indexed: true,
@@ -413,6 +553,12 @@ const deployedContracts = {
             },
             {
               name: "encryptedCID",
+              type: "string",
+              indexed: false,
+              internalType: "string",
+            },
+            {
+              name: "title",
               type: "string",
               indexed: false,
               internalType: "string",
@@ -458,11 +604,520 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1748713399.json",
+      deploymentFile: "run-1748741772.json",
+      deploymentScript: "Deploy.s.sol",
+    },
+    PubkeyProver: {
+      address: "0x12975173b87f7595ee45dffb2ab812ece596bf84",
+      abi: [
+        {
+          type: "function",
+          name: "SALT",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "proof",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "tuple",
+              internalType: "struct Proof",
+              components: [
+                {
+                  name: "seal",
+                  type: "tuple",
+                  internalType: "struct Seal",
+                  components: [
+                    {
+                      name: "verifierSelector",
+                      type: "bytes4",
+                      internalType: "bytes4",
+                    },
+                    {
+                      name: "seal",
+                      type: "bytes32[8]",
+                      internalType: "bytes32[8]",
+                    },
+                    {
+                      name: "mode",
+                      type: "uint8",
+                      internalType: "enum ProofMode",
+                    },
+                  ],
+                },
+                {
+                  name: "callGuestId",
+                  type: "bytes32",
+                  internalType: "bytes32",
+                },
+                {
+                  name: "length",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "callAssumptions",
+                  type: "tuple",
+                  internalType: "struct CallAssumptions",
+                  components: [
+                    {
+                      name: "proverContractAddress",
+                      type: "address",
+                      internalType: "address",
+                    },
+                    {
+                      name: "functionSelector",
+                      type: "bytes4",
+                      internalType: "bytes4",
+                    },
+                    {
+                      name: "settleChainId",
+                      type: "uint256",
+                      internalType: "uint256",
+                    },
+                    {
+                      name: "settleBlockNumber",
+                      type: "uint256",
+                      internalType: "uint256",
+                    },
+                    {
+                      name: "settleBlockHash",
+                      type: "bytes32",
+                      internalType: "bytes32",
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          stateMutability: "pure",
+        },
+        {
+          type: "function",
+          name: "proofPubKey",
+          inputs: [
+            {
+              name: "_message",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
+              name: "_signature",
+              type: "bytes",
+              internalType: "bytes",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "tuple",
+              internalType: "struct Proof",
+              components: [
+                {
+                  name: "seal",
+                  type: "tuple",
+                  internalType: "struct Seal",
+                  components: [
+                    {
+                      name: "verifierSelector",
+                      type: "bytes4",
+                      internalType: "bytes4",
+                    },
+                    {
+                      name: "seal",
+                      type: "bytes32[8]",
+                      internalType: "bytes32[8]",
+                    },
+                    {
+                      name: "mode",
+                      type: "uint8",
+                      internalType: "enum ProofMode",
+                    },
+                  ],
+                },
+                {
+                  name: "callGuestId",
+                  type: "bytes32",
+                  internalType: "bytes32",
+                },
+                {
+                  name: "length",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "callAssumptions",
+                  type: "tuple",
+                  internalType: "struct CallAssumptions",
+                  components: [
+                    {
+                      name: "proverContractAddress",
+                      type: "address",
+                      internalType: "address",
+                    },
+                    {
+                      name: "functionSelector",
+                      type: "bytes4",
+                      internalType: "bytes4",
+                    },
+                    {
+                      name: "settleChainId",
+                      type: "uint256",
+                      internalType: "uint256",
+                    },
+                    {
+                      name: "settleBlockNumber",
+                      type: "uint256",
+                      internalType: "uint256",
+                    },
+                    {
+                      name: "settleBlockHash",
+                      type: "bytes32",
+                      internalType: "bytes32",
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              name: "_nullifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "recoverSigner",
+          inputs: [
+            {
+              name: "_message",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
+              name: "_signature",
+              type: "bytes",
+              internalType: "bytes",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          stateMutability: "pure",
+        },
+        {
+          type: "function",
+          name: "setBlock",
+          inputs: [
+            {
+              name: "blockNo",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "setChain",
+          inputs: [
+            {
+              name: "chainId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "blockNo",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "splitSignature",
+          inputs: [
+            {
+              name: "_signature",
+              type: "bytes",
+              internalType: "bytes",
+            },
+          ],
+          outputs: [
+            {
+              name: "r",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
+              name: "s",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
+              name: "v",
+              type: "uint8",
+              internalType: "uint8",
+            },
+          ],
+          stateMutability: "pure",
+        },
+      ],
+      inheritedFunctions: {},
+      deploymentFile: "run-1748741772.json",
+      deploymentScript: "Deploy.s.sol",
+    },
+    PubkeyVerifier: {
+      address: "0x82dc47734901ee7d4f4232f398752cb9dd5daccc",
+      abi: [
+        {
+          type: "constructor",
+          inputs: [
+            {
+              name: "_prover",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "_setTestVerifier",
+          inputs: [
+            {
+              name: "newVerifier",
+              type: "address",
+              internalType: "contract IProofVerifier",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "nullifiers",
+          inputs: [
+            {
+              name: "",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "prover",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "verifier",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "contract IProofVerifier",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "verify",
+          inputs: [
+            {
+              name: "proof",
+              type: "tuple",
+              internalType: "struct Proof",
+              components: [
+                {
+                  name: "seal",
+                  type: "tuple",
+                  internalType: "struct Seal",
+                  components: [
+                    {
+                      name: "verifierSelector",
+                      type: "bytes4",
+                      internalType: "bytes4",
+                    },
+                    {
+                      name: "seal",
+                      type: "bytes32[8]",
+                      internalType: "bytes32[8]",
+                    },
+                    {
+                      name: "mode",
+                      type: "uint8",
+                      internalType: "enum ProofMode",
+                    },
+                  ],
+                },
+                {
+                  name: "callGuestId",
+                  type: "bytes32",
+                  internalType: "bytes32",
+                },
+                {
+                  name: "length",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "callAssumptions",
+                  type: "tuple",
+                  internalType: "struct CallAssumptions",
+                  components: [
+                    {
+                      name: "proverContractAddress",
+                      type: "address",
+                      internalType: "address",
+                    },
+                    {
+                      name: "functionSelector",
+                      type: "bytes4",
+                      internalType: "bytes4",
+                    },
+                    {
+                      name: "settleChainId",
+                      type: "uint256",
+                      internalType: "uint256",
+                    },
+                    {
+                      name: "settleBlockNumber",
+                      type: "uint256",
+                      internalType: "uint256",
+                    },
+                    {
+                      name: "settleBlockHash",
+                      type: "bytes32",
+                      internalType: "bytes32",
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              name: "_nullifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "error",
+          name: "InvalidChainId",
+          inputs: [],
+        },
+      ],
+      inheritedFunctions: {},
+      deploymentFile: "run-1748741772.json",
+      deploymentScript: "Deploy.s.sol",
+    },
+    MockZKVerifier: {
+      address: "0x82c6d3ed4cd33d8ec1e51d0b5cc1d822eaa0c3dc",
+      abi: [
+        {
+          type: "function",
+          name: "setVerificationResult",
+          inputs: [
+            {
+              name: "result",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "verificationResult",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "verify",
+          inputs: [
+            {
+              name: "",
+              type: "bytes",
+              internalType: "bytes",
+            },
+            {
+              name: "",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          stateMutability: "view",
+        },
+      ],
+      inheritedFunctions: {},
+      deploymentFile: "run-1748741772.json",
       deploymentScript: "Deploy.s.sol",
     },
     ZkAccountFactory: {
-      address: "0xe1da8919f262ee86f9be05059c9280142cf23f48",
+      address: "0xd04ff4a75edd737a73e92b2f2274cb887d96e110",
       abi: [
         {
           type: "constructor",
@@ -486,8 +1141,74 @@ const deployedContracts = {
           inputs: [
             {
               name: "proof",
-              type: "bytes",
-              internalType: "bytes",
+              type: "tuple",
+              internalType: "struct Proof",
+              components: [
+                {
+                  name: "seal",
+                  type: "tuple",
+                  internalType: "struct Seal",
+                  components: [
+                    {
+                      name: "verifierSelector",
+                      type: "bytes4",
+                      internalType: "bytes4",
+                    },
+                    {
+                      name: "seal",
+                      type: "bytes32[8]",
+                      internalType: "bytes32[8]",
+                    },
+                    {
+                      name: "mode",
+                      type: "uint8",
+                      internalType: "enum ProofMode",
+                    },
+                  ],
+                },
+                {
+                  name: "callGuestId",
+                  type: "bytes32",
+                  internalType: "bytes32",
+                },
+                {
+                  name: "length",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "callAssumptions",
+                  type: "tuple",
+                  internalType: "struct CallAssumptions",
+                  components: [
+                    {
+                      name: "proverContractAddress",
+                      type: "address",
+                      internalType: "address",
+                    },
+                    {
+                      name: "functionSelector",
+                      type: "bytes4",
+                      internalType: "bytes4",
+                    },
+                    {
+                      name: "settleChainId",
+                      type: "uint256",
+                      internalType: "uint256",
+                    },
+                    {
+                      name: "settleBlockNumber",
+                      type: "uint256",
+                      internalType: "uint256",
+                    },
+                    {
+                      name: "settleBlockHash",
+                      type: "bytes32",
+                      internalType: "bytes32",
+                    },
+                  ],
+                },
+              ],
             },
             {
               name: "root",
@@ -515,8 +1236,74 @@ const deployedContracts = {
           inputs: [
             {
               name: "proof",
-              type: "bytes",
-              internalType: "bytes",
+              type: "tuple",
+              internalType: "struct Proof",
+              components: [
+                {
+                  name: "seal",
+                  type: "tuple",
+                  internalType: "struct Seal",
+                  components: [
+                    {
+                      name: "verifierSelector",
+                      type: "bytes4",
+                      internalType: "bytes4",
+                    },
+                    {
+                      name: "seal",
+                      type: "bytes32[8]",
+                      internalType: "bytes32[8]",
+                    },
+                    {
+                      name: "mode",
+                      type: "uint8",
+                      internalType: "enum ProofMode",
+                    },
+                  ],
+                },
+                {
+                  name: "callGuestId",
+                  type: "bytes32",
+                  internalType: "bytes32",
+                },
+                {
+                  name: "length",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "callAssumptions",
+                  type: "tuple",
+                  internalType: "struct CallAssumptions",
+                  components: [
+                    {
+                      name: "proverContractAddress",
+                      type: "address",
+                      internalType: "address",
+                    },
+                    {
+                      name: "functionSelector",
+                      type: "bytes4",
+                      internalType: "bytes4",
+                    },
+                    {
+                      name: "settleChainId",
+                      type: "uint256",
+                      internalType: "uint256",
+                    },
+                    {
+                      name: "settleBlockNumber",
+                      type: "uint256",
+                      internalType: "uint256",
+                    },
+                    {
+                      name: "settleBlockHash",
+                      type: "bytes32",
+                      internalType: "bytes32",
+                    },
+                  ],
+                },
+              ],
             },
             {
               name: "root",
@@ -576,8 +1363,74 @@ const deployedContracts = {
           inputs: [
             {
               name: "proof",
-              type: "bytes",
-              internalType: "bytes",
+              type: "tuple",
+              internalType: "struct Proof",
+              components: [
+                {
+                  name: "seal",
+                  type: "tuple",
+                  internalType: "struct Seal",
+                  components: [
+                    {
+                      name: "verifierSelector",
+                      type: "bytes4",
+                      internalType: "bytes4",
+                    },
+                    {
+                      name: "seal",
+                      type: "bytes32[8]",
+                      internalType: "bytes32[8]",
+                    },
+                    {
+                      name: "mode",
+                      type: "uint8",
+                      internalType: "enum ProofMode",
+                    },
+                  ],
+                },
+                {
+                  name: "callGuestId",
+                  type: "bytes32",
+                  internalType: "bytes32",
+                },
+                {
+                  name: "length",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "callAssumptions",
+                  type: "tuple",
+                  internalType: "struct CallAssumptions",
+                  components: [
+                    {
+                      name: "proverContractAddress",
+                      type: "address",
+                      internalType: "address",
+                    },
+                    {
+                      name: "functionSelector",
+                      type: "bytes4",
+                      internalType: "bytes4",
+                    },
+                    {
+                      name: "settleChainId",
+                      type: "uint256",
+                      internalType: "uint256",
+                    },
+                    {
+                      name: "settleBlockNumber",
+                      type: "uint256",
+                      internalType: "uint256",
+                    },
+                    {
+                      name: "settleBlockHash",
+                      type: "bytes32",
+                      internalType: "bytes32",
+                    },
+                  ],
+                },
+              ],
             },
             {
               name: "root",
@@ -619,7 +1472,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1748713399.json",
+      deploymentFile: "run-1748741772.json",
       deploymentScript: "Deploy.s.sol",
     },
   },

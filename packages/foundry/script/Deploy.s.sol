@@ -4,6 +4,8 @@ pragma solidity ^0.8.19;
 import "./DeployHelpers.s.sol";
 import { DeployPrivacyMarketplace } from "./DeployPrivacyMarketplace.s.sol";
 import { DeployZkAccountFactory } from "./DeployZkAccountFactory.s.sol";
+import { DeployPubkeyVerifier } from "./DeployPubkeyVerifier.s.sol";
+import { DeployPubkeyProver } from "./DeployPubkeyProver.s.sol";
 
 /**
  * @notice Main deployment script for all contracts
@@ -20,12 +22,21 @@ contract DeployScript is ScaffoldETHDeploy {
         DeployPrivacyMarketplace deployPrivacyMarketplace = new DeployPrivacyMarketplace();
         deployPrivacyMarketplace.run();
 
-        // Deploy ZkAccountFactory contract
-        DeployZkAccountFactory deployZkAccountFactory = new DeployZkAccountFactory();
-        deployZkAccountFactory.run();
+        // Deploy PubkeyProver contract
+        DeployPubkeyProver deployPubkeyProver = new DeployPubkeyProver();
+        deployPubkeyProver.run();
 
-        // Deploy another contract
-        // DeployMyContract myContract = new DeployMyContract();
-        // myContract.run();
+        // Deploy PubkeyVerifier contract
+        DeployPubkeyVerifier deployPubkeyVerifier = new DeployPubkeyVerifier(
+            address(deployPubkeyProver)
+        );
+        deployPubkeyVerifier.run();
+
+        // Deploy ZkAccountFactory contract
+        DeployZkAccountFactory deployZkAccountFactory = new DeployZkAccountFactory(
+            address(deployPubkeyVerifier),
+            address(deployPubkeyProver)
+        );
+        deployZkAccountFactory.run();
     }
 }

@@ -3,7 +3,6 @@ pragma solidity ^0.8.21;
 
 import {Proof} from "vlayer-0.1.0/Proof.sol";
 import {Prover} from "vlayer-0.1.0/Prover.sol";
-import {IERC20} from "openzeppelin-contracts/token/ERC20/IERC20.sol";
 
 contract PubkeyProver is Prover {
     bytes32 public constant SALT = keccak256("ETH_PRAGUE_25");
@@ -22,13 +21,13 @@ contract PubkeyProver is Prover {
         }
     }
 
-    function recoverSigner(bytes32 _message, bytes32 _signature) public pure returns (address) {
+    function recoverSigner(bytes32 _message, bytes memory _signature) public pure returns (address) {
         (bytes32 r, bytes32 s, uint8 v) = splitSignature(_signature);
 
         return ecrecover(_message, v, r, s);
     }
 
-    function proofPubKey(bytes32 _message, bytes32 _signature) public returns (Proof memory, bytes32 _nullifier) 
+    function proofPubKey(bytes32 _message, bytes memory _signature) public returns (Proof memory, bytes32 _nullifier) 
     {
         address signer = recoverSigner(_message, _signature);
         require(signer != address(0), "invalid signature");

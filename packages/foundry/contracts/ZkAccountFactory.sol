@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import { ZkAccount } from "./ZkAccount.sol";
 import { IEntryPoint } from "@account-abstraction/contracts/interfaces/IEntryPoint.sol";
 import { IZKVerifier } from "./IZKVerifier.sol";
+import {Proof} from "vlayer-0.1.0/Proof.sol";
 
 /**
  * @title ZkAccountFactory
@@ -31,7 +32,7 @@ contract ZkAccountFactory {
      * @param salt The salt for CREATE2 deployment
      * @return ret The address of the created or existing account
      */
-    function createAccount(bytes calldata proof, bytes32 root, bytes32 salt) public returns (ZkAccount ret) {
+    function createAccount(Proof calldata proof, bytes32 root, bytes32 salt) public returns (ZkAccount ret) {
         address addr = getAddress(proof, root, salt);
         uint256 codeSize = addr.code.length;
         if (codeSize > 0) {
@@ -52,8 +53,8 @@ contract ZkAccountFactory {
     /**
      * @dev Creates account with auto-generated salt for convenience
      */
-    function createAccountWithAutoSalt(bytes calldata proof, bytes32 root) external returns (ZkAccount) {
-        bytes32 salt = keccak256(abi.encodePacked(msg.sender, proof, root, block.timestamp));
+    function createAccountWithAutoSalt(Proof calldata proof, bytes32 root) external returns (ZkAccount) {
+        bytes32 salt = keccak256(abi.encode(msg.sender, proof, root, block.timestamp));
         return createAccount(proof, root, salt);
     }
 
@@ -65,7 +66,7 @@ contract ZkAccountFactory {
      * @param salt The salt for CREATE2 deployment
      * @return The predicted address of the account
      */
-    function getAddress(bytes calldata proof, bytes32 root, bytes32 salt) public view returns (address) {
+    function getAddress(Proof calldata proof, bytes32 root, bytes32 salt) public view returns (address) {
         bytes32 hash = keccak256(
             abi.encodePacked(
                 bytes1(0xff),

@@ -4,9 +4,9 @@ pragma solidity ^0.8.21;
 import {Proof} from "vlayer-0.1.0/Proof.sol";
 import {Verifier} from "vlayer-0.1.0/Verifier.sol";
 
-import {PubkeyProver} from "./PubkeyProver.sol";
+import {PubkeyProver} from "./vlayer/PubkeyProver.sol";
 
-import {IZKVerifier} from "../IZKVerifier.sol";
+import {IZKVerifier} from "./IZKVerifier.sol";
 
 contract PubkeyVerifier is Verifier, IZKVerifier {
     address public prover;

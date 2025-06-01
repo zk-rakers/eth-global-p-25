@@ -7,14 +7,19 @@ import "../contracts/IZKVerifier.sol";
 import "@account-abstraction/contracts/interfaces/IEntryPoint.sol";
 import "@account-abstraction/contracts/core/UserOperationLib.sol";
 
+import {Proof} from "vlayer-0.1.0/Proof.sol";
+import {CallAssumptions} from "vlayer-0.1.0/CallAssumptions.sol";
+import {Seal} from "vlayer-0.1.0/Seal.sol";
+import {ProofMode} from "vlayer-0.1.0/Seal.sol";
+
 // Mock ZK Verifier for testing
 contract MockZKVerifier is IZKVerifier {
     mapping(bytes32 => bool) public validProofs;
     mapping(bytes32 => bool) public proofSet;
     bool public defaultVerifyResult = true;
 
-    function setProofValid(bytes memory proof, bytes32 root, bool isValid) external {
-        bytes32 key = keccak256(abi.encodePacked(proof, root));
+    function setProofValid(Proof calldata proof, bytes32 _nullifier, bool isValid) external {
+        bytes32 key = keccak256(abi.encodePacked(proof.seal.seal, _nullifier));
         validProofs[key] = isValid;
         proofSet[key] = true;
     }
@@ -23,8 +28,8 @@ contract MockZKVerifier is IZKVerifier {
         defaultVerifyResult = result;
     }
 
-    function verify(bytes calldata proof, bytes32 root) external view override returns (bool) {
-        bytes32 key = keccak256(abi.encodePacked(proof, root));
+    function verify(Proof calldata proof, bytes32 _nullifier) external view override returns (bool) {
+        bytes32 key = keccak256(abi.encodePacked(proof.seal.seal, _nullifier));
         // If this specific proof/root combination was explicitly set, use that value
         if (proofSet[key]) {
             return validProofs[key];
@@ -57,8 +62,18 @@ contract ZkAccountTest is Test {
     MockEntryPoint public mockEntryPoint;
 
     // Test data
-    bytes public validProof = abi.encodePacked("valid_proof_data");
-    bytes public invalidProof = abi.encodePacked("invalid_proof_data");
+    Proof public validProof = Proof(
+        Seal(bytes4(0), [bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0)], ProofMode.GROTH16),
+        bytes32(0),
+        0,
+        CallAssumptions(address(0), 0, 0, 0, 0)
+    );
+    Proof public invalidProof = Proof(
+        Seal(bytes4(0), [bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0), bytes32(0)], ProofMode.GROTH16),
+        bytes32(0),
+        0,
+        CallAssumptions(address(0), 0, 0, 0, 0)
+    );
     bytes32 public validRoot = keccak256(abi.encodePacked("valid_merkle_root"));
     bytes32 public invalidRoot = keccak256(abi.encodePacked("invalid_merkle_root"));
 
@@ -229,10 +244,10 @@ contract ZkAccountTest is Test {
         assertTrue(account1.verifiedRoot() != account2.verifiedRoot());
     }
 
-    function testFuzzValidateUserOp(bytes memory fuzzProof, bytes32 fuzzRoot) public {
+    function testFuzzValidateUserOp(Proof memory fuzzProof, bytes32 fuzzRoot) public {
         // Skip if the fuzzed values match our valid setup to avoid conflicts
         vm.assume(
-            keccak256(abi.encodePacked(fuzzProof, validRoot)) != keccak256(abi.encodePacked(validProof, validRoot))
+            keccak256(abi.encodePacked(fuzzProof.seal.seal, validRoot)) != keccak256(abi.encodePacked(validProof.seal.seal, validRoot))
         );
 
         zkAccount = new ZkAccount(IEntryPoint(address(mockEntryPoint)), mockVerifier, validProof, validRoot);
