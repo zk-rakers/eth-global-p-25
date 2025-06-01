@@ -1,7 +1,7 @@
 import { Sandbox } from '@e2b/code-interpreter';
-import { MistralClient } from '@mistralai/mistralai';
+// import { MistralClient } from '@mistralai/mistralai';
 
-const client = new MistralClient(process.env.MISTRAL_API_KEY);
+// const client = new MistralClient(process.env.MISTRAL_API_KEY);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

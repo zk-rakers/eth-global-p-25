@@ -1,101 +1,73 @@
-import React from "react";
-import Link from "next/link";
-import GreetingsTable from "./_components/GreetingsTable";
-import type { NextPage } from "next";
-import { MagnifyingGlassIcon, PlusIcon, PowerIcon, RocketLaunchIcon } from "@heroicons/react/24/outline";
+"use client";
 
-const Subgraph: NextPage = () => {
+import { useEffect, useState } from "react";
+import { type Request, getAllRequests, getUserRequests } from "./_components/queryFunctions";
+import { useAccount } from "wagmi";
+
+const Subgraph = () => {
+  const { address } = useAccount();
+  const [userRequests, setUserRequests] = useState<Request[]>([]);
+  const [allRequests, setAllRequests] = useState<Request[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch all requests
+      const allData = await getAllRequests();
+      setAllRequests(allData);
+
+      // Fetch user requests if address exists
+      if (address) {
+        const userData = await getUserRequests(address);
+        setUserRequests(userData);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error("Failed to fetch data"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [address]);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div className="text-red-500">Error: {error.message}</div>;
+
   return (
-    <>
-      <div>
-        <div className="flex items-center flex-col flex-grow pt-10">
-          <h1 className="text-center mb-8">
-            <span className="block text-2xl mb-2">Welcome to your</span>
-            <span className="block text-4xl font-bold">Subgraph</span>
-          </h1>
-          <p className="text-center text-lg">
-            Look at the subgraph manifest defined in{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/subgraph/subgraph.yaml
-            </code>
-          </p>
-          <p className="text-center text-lg">
-            Examine the entities in{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              schema.graphql
-            </code>{" "}
-            located in{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/subgraph/src
-            </code>
-          </p>
-          <p className="text-center text-lg">
-            Data is processed using AssemblyScript Mappings in{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/subgraph/src/mapping.ts
-            </code>
-          </p>
-        </div>
-        <div className="flex-grow bg-base-300 w-full mt-16 px-8 py-12">
-          <div className="flex justify-center items-center gap-12 flex-col sm:flex-row">
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <PowerIcon className="h-8 w-8 fill-secondary" />
-              <p className="text-center text-lg">
-                Start your subgraph environment using{" "}
-                <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-                  yarn subgraph:run-node
-                </code>
-              </p>
-            </div>
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <PlusIcon className="h-8 w-8 fill-secondary" />
-              <p className="text-center text-lg">
-                Create your subgraph on graph-node with{" "}
-                <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-                  yarn subgraph:create-local
-                </code>
-              </p>
-            </div>
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <RocketLaunchIcon className="h-8 w-8 fill-secondary" />
-              <p className="text-center text-lg">
-                Deploy your subgraph configuration with{" "}
-                <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-                  yarn subgraph:local-ship
-                </code>
-              </p>
-            </div>
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <PlusIcon className="h-8 w-8 fill-secondary" />
-              <p className="text-center text-lg">
-                Create Graph Client runtime artifact directory with{" "}
-                <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-                  yarn graphclient:build
-                </code>
-              </p>
-            </div>
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <MagnifyingGlassIcon className="h-8 w-8 fill-secondary" />
-              <p className="mb-0">Explore data using the</p>
-              <Link
-                href="http://localhost:8000/subgraphs/name/scaffold-eth/your-contract/graphql"
-                passHref
-                className="link"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                GraphiQL tool.
-              </Link>{" "}
-              Clean up any stale data using{" "}
-              <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-                yarn subgraph:clean-node
-              </code>
-            </div>
-          </div>
-        </div>
-        <GreetingsTable />
+    <div className="p-6">
+      <h1 className="text-3xl font-bold mb-4">Orders</h1>
+
+      <button onClick={fetchData} className="btn btn-primary mb-4">
+        Refresh Data
+      </button>
+
+      {/* User's Orders */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-4">Your Orders</h2>
+        {!address ? (
+          <div>Please connect your wallet</div>
+        ) : userRequests.length === 0 ? (
+          <div>No orders found for your address</div>
+        ) : (
+          <pre className="bg-base-200 p-4 rounded-lg overflow-auto">{JSON.stringify(userRequests, null, 2)}</pre>
+        )}
       </div>
-    </>
+
+      {/* All Orders History */}
+      <div>
+        <h2 className="text-2xl font-bold mb-4">All Orders History</h2>
+        {allRequests.length === 0 ? (
+          <div>No orders found</div>
+        ) : (
+          <pre className="bg-base-200 p-4 rounded-lg overflow-auto">{JSON.stringify(allRequests, null, 2)}</pre>
+        )}
+      </div>
+    </div>
   );
 };
 

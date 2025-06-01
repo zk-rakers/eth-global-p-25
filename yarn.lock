@@ -4986,9 +4986,9 @@ __metadata:
   linkType: hard
 
 "@pkgr/core@npm:^0.2.4":
-  version: 0.2.4
-  resolution: "@pkgr/core@npm:0.2.4"
-  checksum: 8544f0346c3f7035b9e2fdf60179c68b12d3c76b3fba9533844099af67cf5c0ce5257538f5faa05953d48cc1536d046f003231f321b2f75b3fb449db8410a2b7
+  version: 0.2.5
+  resolution: "@pkgr/core@npm:0.2.5"
+  checksum: 9df63a2b98c26532ca7c7b468c31e1826b3f340e22e3f7929f93e4082c172b8811dcf655db1e7301bde7ada211d81818a682bb33fdcf173dce4b3fc223022436
   languageName: node
   linkType: hard
 
@@ -15514,7 +15514,7 @@ __metadata:
 "nan@github:JCMais/nan#fix/electron-failures":
   version: 2.22.0
   resolution: "nan@https://github.com/JCMais/nan.git#commit=0ec2eca8b2fd7518affb3945d087e393ad839b7e"
-  checksum: c40115d6f74d8141a307d4d6225eccd4681b3f7790640cfc2cdadcb3b1fa6f5a14dc41218a570b7170f28ff583bb3bfdcd673a2b548a50592a1794e1603582ad
+  checksum: c501215301d0590ab363644a1e372873c493aeb41a6d8f5b0314c3e6a2a0819900795ef73e88bccf141a256cc7dcc1b8993c2ebc6346b177b779a01aeb9e854b
   languageName: node
   linkType: hard
 
@@ -19933,7 +19933,7 @@ __metadata:
 "uWebSockets.js@uNetworking/uWebSockets.js#semver:^20":
   version: 20.52.0
   resolution: "uWebSockets.js@https://github.com/uNetworking/uWebSockets.js.git#commit=cfc9a40d8132a34881813cec3d5f8e3a185b3ce3"
-  checksum: b78d5b08d762bebb45795dfa67d63fcc80f7898036a60935834af7218ae474a844a4b16f8c15e529ca2f9d0c8db22527fc1093ea2cf4eaec42dd2191c5bc1245
+  checksum: 30113425af9f5fec28737ca894e49f7d061ff4fe7daf601f9a0422ffbdd4ae18990b639b75cc3682a2891b5fb293685b8f07ff4c45042b1e03c575b4761d70f2
   languageName: node
   linkType: hard
 
@@ -21375,9 +21375,9 @@ __metadata:
   linkType: hard
 
 "zod@npm:^3.21.4, zod@npm:^3.22.4, zod@npm:^3.25.42":
-  version: 3.25.42
-  resolution: "zod@npm:3.25.42"
-  checksum: 47c47acf3f98a92057e5ad1eb026953390a9a1b55affa574981b46b91bb17cc63daff78d24f670ef5511481b8bfd26963bcfd169aa966a33d17f6ee719016554
+  version: 3.25.45
+  resolution: "zod@npm:3.25.45"
+  checksum: 0c5a000455379aa1367dc2b886d1c83eb4d5063fefa2a8d4c10f09c3c8361697225d60b5dbf635757a25fc240128bc40f3bfee4ee1163bf7daf2b1d7cdc1e772
   languageName: node
   linkType: hard
 

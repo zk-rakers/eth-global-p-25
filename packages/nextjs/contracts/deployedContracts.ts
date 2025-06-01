@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   31337: {
     PrivacyMarketplace: {
-      address: "0x0c8e79f3534b00d9a3d4a856b665bf4ebc22f2ba",
+      address: "0x700b6a60ce7eaaea56f065753d8dcb9653dbad35",
       abi: [
         {
           type: "function",
@@ -604,11 +604,11 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1748715381.json",
+      deploymentFile: "run-1748731742.json",
       deploymentScript: "Deploy.s.sol",
     },
     ZkAccountFactory: {
-      address: "0x196dbcbb54b8ec4958c959d8949ebfe87ac2aaaf",
+      address: "0xe1da8919f262ee86f9be05059c9280142cf23f48",
       abi: [
         {
           type: "constructor",
@@ -765,7 +765,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deploymentFile: "run-1748715381.json",
+      deploymentFile: "run-1748731742.json",
       deploymentScript: "Deploy.s.sol",
     },
   },

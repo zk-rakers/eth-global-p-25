@@ -1,0 +1,11 @@
+query GetRequests($identifier: Bytes!) {
+  requests(where: { userIdentifier: $identifier }, orderBy: timestamp, orderDirection: desc) {
+    bidCount
+    commitment
+    isActive
+    id
+    title
+    timestamp
+    userIdentifier
+  }
+}
