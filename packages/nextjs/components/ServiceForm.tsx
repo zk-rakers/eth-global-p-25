@@ -14,7 +14,7 @@ export const ServiceForm = () => {
   const { submitService, isLoading } = usePrivacyMarketplace();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault();
     setError(null);
     setSuccess(null);
     setIsSubmitting(true);
@@ -66,7 +66,7 @@ export const ServiceForm = () => {
             id="location"
             value={location}
             onChange={e => setLocation(e.target.value)}
-            className="input input-bordered w-full"
+            className="input input-bordered w-full rounded-none"
             placeholder="Enter location"
             required
           />
@@ -80,18 +80,18 @@ export const ServiceForm = () => {
             id="description"
             value={description}
             onChange={e => setDescription(e.target.value)}
-            className="textarea textarea-bordered w-full h-32"
+            className="textarea textarea-bordered w-full h-32 rounded-none"
             placeholder="Enter service description"
             required
           />
         </div>
 
-        <button type="submit" className="btn btn-primary w-full" disabled={isSubmitting || isLoading}>
+        <button type="submit" className="btn btn-primary w-full rounded-none" disabled={isSubmitting || isLoading}>
           {isSubmitting || isLoading ? "Submitting..." : "Submit Service"}
         </button>
 
         {error && (
-          <div className="alert alert-error">
+          <div className="alert alert-error rounded-none">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="stroke-current shrink-0 h-6 w-6"
@@ -110,7 +110,7 @@ export const ServiceForm = () => {
         )}
 
         {success && (
-          <div className="alert alert-success">
+          <div className="alert bg-success/20 border-success text-success-content rounded-none">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="stroke-current shrink-0 h-6 w-6"
@@ -124,7 +124,7 @@ export const ServiceForm = () => {
                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <span>{success}</span>
+            <span className="font-medium">{success}</span>
           </div>
         )}
       </form>

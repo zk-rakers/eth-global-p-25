@@ -11,23 +11,19 @@ export function usePrivacyMarketplace() {
   });
 
   const submitService = useCallback(
-    async (hash: string, ipfsHash: string) => {
+    async (bytes32Hash: string, ipfsHash: string) => {
       try {
         console.log("Starting contract interaction...");
-        console.log("Hash:", hash);
+        console.log("Bytes32 Hash:", bytes32Hash);
         console.log("IPFS Hash:", ipfsHash);
 
-        // Ensure hash is in the correct format for bytes32
-        const formattedHash = hash.startsWith("0x") ? hash : `0x${hash}`;
-        if (formattedHash.length !== 66) {
-          // 0x + 64 hex chars
-          throw new Error("Invalid hash format. Expected 32 bytes (64 hex chars)");
-        }
-        console.log("Formatted hash:", formattedHash);
+        // Format IPFS hash to ensure it has 0x prefix
+        const formattedIpfsHash = ipfsHash.startsWith("0x") ? ipfsHash : `0x${ipfsHash}`;
+        console.log("Formatted IPFS hash:", formattedIpfsHash);
 
         const tx = await postRequest({
           functionName: "postRequest",
-          args: [formattedHash as `0x${string}`, ipfsHash as `0x${string}`],
+          args: [bytes32Hash as `0x${string}`, formattedIpfsHash as `0x${string}`],
         });
 
         console.log("Transaction result:", tx);
