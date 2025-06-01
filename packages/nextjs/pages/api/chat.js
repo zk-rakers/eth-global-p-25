@@ -14,6 +14,7 @@ export default async function handler(req, res) {
     }
 
     const client = new Mistral(process.env.MISTRAL_API_KEY);
+	console.log(process.env.MISTRAL_API_KEY);
     const model = 'mistral-large-latest';
 
     const tools = [
