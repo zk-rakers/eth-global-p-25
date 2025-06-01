@@ -33,19 +33,21 @@ If the request appears illegal or unsafe, respond:
 
 Only proceed if the service request is valid.`;
   }
+  else if (mode === 'intro') {
+    return `You are a helpful assistant that helps users understand the A-proof platform.`;
+  }
+  else if (mode === 'bid') {
+    return `You are a helpful assistant that helps users understand the A-proof platform.`;
+  }
   return "You are a helpful assistant.";
 };
 
 const getIntroMessage = (mode) => {
   if (mode === 'bid') {
     return `furture bid implementation`;
-  }
-  return null;
-};
-
-const getIntro = (mode) => {
-  if (mode === 'intro') {
-    return `You are a helpful assistant that helps users understand the A-proof platform.`;
+  } else if (mode === 'request') {
+    return `Welcome! Let's create your service request.
+Please describe what you need in a few words — whether you're offering a service or looking for help.`;
   }
   return null;
 };
@@ -141,7 +143,7 @@ const AI_child = ({ initialMode = "request", onBack, onSubmit }) => {
       return;
     }
   
-    console.log("📝 Parsed Request:", { title, description });
+    //console.log("📝 Parsed Request:", { title, description });
     onSubmit?.({ title, description });
   };
   
