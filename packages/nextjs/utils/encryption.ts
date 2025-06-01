@@ -2,9 +2,8 @@ import axios from "axios";
 import { keccak256, toUtf8Bytes } from "ethers";
 
 interface ServiceData {
-  location: string;
+  title: string;
   description: string;
-  timestamp: string;
 }
 
 // interface PinataResponse {
@@ -68,9 +67,8 @@ export async function hashAndStoreData(data: ServiceData) {
     const metadataString = JSON.stringify({
       name: "Service Data",
       keyvalues: {
+        title: data.title,
         description: data.description,
-        timestamp: data.timestamp,
-        location: data.location,
       },
     });
     formData.append("pinataMetadata", metadataString);

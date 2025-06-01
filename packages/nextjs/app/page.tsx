@@ -1,402 +1,468 @@
 "use client";
 
-import React from "react";
-import { ServiceForm } from "../components/ServiceForm";
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
 import {
-  FaCheckCircle,
-  FaCode,
-  FaDiscord,
-  FaGithub,
-  FaMedium,
-  FaShieldAlt,
-  FaStar,
-  FaStarHalfAlt,
-  FaTelegram,
-  FaTwitter,
-  FaUser,
+  FaChevronLeft,
+  FaChevronRight,
+  FaEthereum,
+  FaEye,
+  FaHandshake,
+  FaLock,
+  FaPlusCircle,
+  FaUserSecret,
   FaWallet,
 } from "react-icons/fa";
 
+interface ServiceData {
+  location: string;
+  description: string;
+  timestamp: string;
+}
+
+interface Service extends ServiceData {
+  id: number;
+  title: string;
+  price: string;
+}
+
+interface Request {
+  id: number;
+  title: string;
+  price: string;
+}
+
 export default function CryptoMarketplace() {
+  const [walletConnected, setWalletConnected] = useState(false);
+  const [currentServiceIndex, setCurrentServiceIndex] = useState(0);
+  const [currentRequestIndex, setCurrentRequestIndex] = useState(0);
+  const [isServicesHovering, setIsServicesHovering] = useState(false);
+  const [isRequestsHovering, setIsRequestsHovering] = useState(false);
+  const itemsPerPage = 5;
+
+  // Sample data
+  const services: Service[] = [
+    {
+      id: 1,
+      title: "Anonymous Coding Tutor",
+      price: "0.05 ETH",
+      location: "Remote",
+      description: "Expert in Solidity & React. Learn to build dApps without revealing your identity.",
+      timestamp: new Date().toISOString(),
+    },
+    {
+      id: 2,
+      title: "Ghost Writer",
+      price: "0.12 ETH",
+      location: "Remote",
+      description: "Technical content creation for blockchain projects. Complete anonymity guaranteed.",
+      timestamp: new Date().toISOString(),
+    },
+    {
+      id: 3,
+      title: "Encrypted Data Analysis",
+      price: "0.08 ETH",
+      location: "Remote",
+      description: "Secure data processing with zero-knowledge proofs. Your data never leaves your device.",
+      timestamp: new Date().toISOString(),
+    },
+    {
+      id: 4,
+      title: "Private Investigator",
+      price: "0.25 ETH",
+      location: "Remote",
+      description: "Discreet information gathering with blockchain-based reporting.",
+      timestamp: new Date().toISOString(),
+    },
+    {
+      id: 5,
+      title: "Security Auditor",
+      price: "0.30 ETH",
+      location: "Remote",
+      description: "Smart contract and system security review from anonymous experts.",
+      timestamp: new Date().toISOString(),
+    },
+    {
+      id: 6,
+      title: "Cryptographic Consultant",
+      price: "0.18 ETH",
+      location: "Remote",
+      description: "Privacy-focused cryptographic solutions for your projects.",
+      timestamp: new Date().toISOString(),
+    },
+  ];
+
+  const requests: Request[] = [
+    { id: 101, title: "Walk with a dog in Paris", price: "0.03 ETH" },
+    { id: 102, title: "Anonymous UI Designer Needed", price: "0.15 ETH" },
+    { id: 103, title: "Off-grid Security Audit", price: "0.25 ETH" },
+    { id: 104, title: "Private French Lessons", price: "0.07 ETH" },
+    { id: 105, title: "Secure Document Delivery", price: "0.10 ETH" },
+    { id: 106, title: "Crypto Wallet Recovery Help", price: "0.20 ETH" },
+    { id: 107, title: "Anonymous Market Research", price: "0.12 ETH" },
+    { id: 108, title: "Tor Network Setup Assistance", price: "0.09 ETH" },
+  ];
+
+  const getVisibleServices = () => {
+    const items = [];
+    for (let i = 0; i < itemsPerPage; i++) {
+      const index = (currentServiceIndex + i) % services.length;
+      items.push(services[index]);
+    }
+    return items;
+  };
+
+  const getVisibleRequests = () => {
+    const items = [];
+    for (let i = 0; i < itemsPerPage; i++) {
+      const index = (currentRequestIndex + i) % requests.length;
+      items.push(requests[index]);
+    }
+    return items;
+  };
+
+  const nextServices = () => {
+    setCurrentServiceIndex(prev => (prev + 1) % services.length);
+  };
+
+  const prevServices = () => {
+    setCurrentServiceIndex(prev => (prev - 1 + services.length) % services.length);
+  };
+
+  const nextRequests = () => {
+    setCurrentRequestIndex(prev => (prev + 1) % requests.length);
+  };
+
+  const prevRequests = () => {
+    setCurrentRequestIndex(prev => (prev - 1 + requests.length) % requests.length);
+  };
+
+  // Auto-scroll effect with independent pause on hover
+  useEffect(() => {
+    let serviceInterval: NodeJS.Timeout;
+    let requestInterval: NodeJS.Timeout;
+
+    if (!isServicesHovering) {
+      serviceInterval = setInterval(nextServices, 6555);
+    }
+    if (!isRequestsHovering) {
+      requestInterval = setInterval(nextRequests, 6555);
+    }
+
+    return () => {
+      if (serviceInterval) clearInterval(serviceInterval);
+      if (requestInterval) clearInterval(requestInterval);
+    };
+  }, [isServicesHovering, isRequestsHovering, nextServices, nextRequests]);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2, // Increased from 0.1 to 0.2
+        delayChildren: 0.3, // Added delay before starting animations
+      },
+    },
+  };
+
+  const cardVariants = {
+    initial: {
+      scale: 1,
+      y: 0,
+      rotateX: 0,
+      boxShadow: "0 0 0 rgba(0,0,0,0)",
+    },
+    hover: {
+      scale: 1.03,
+      y: -5,
+      rotateX: 2,
+      boxShadow: "0 10px 30px -10px rgba(0, 0, 0, 0.3)",
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 17,
+        mass: 1,
+      },
+    },
+    tap: {
+      scale: 0.98,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 17,
+        mass: 1,
+      },
+    },
+  };
+
+  const buttonVariants = {
+    initial: {
+      scale: 1,
+      backgroundColor: "#000000",
+    },
+    hover: {
+      scale: 1.05,
+      backgroundColor: "#1a1a1a",
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 10,
+      },
+    },
+    tap: {
+      scale: 0.95,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 10,
+      },
+    },
+  };
+
+  const contentVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+      },
+    },
+  };
+
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen bg-base-100">
       {/* Header */}
-      <header className="sticky top-0 bg-white z-50 shadow-sm py-4">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <nav className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-gray-900 text-white rounded-lg flex items-center justify-center">C</div>
-              <span className="text-xl font-bold">CryptoMarket</span>
-            </div>
+      <header className="navbar bg-base-200 border-b border-base-300">
+        <div className="navbar-start">
+          <div className="flex items-center gap-2">
+            <FaUserSecret className="text-2xl text-accent" />
+            <span className="text-xl font-bold text-accent">A-proof</span>
+          </div>
+        </div>
 
-            <ul className="hidden md:flex gap-8">
-              <li>
-                <a
-                  href="#"
-                  className="font-medium hover:text-gray-700 transition relative after:absolute after:bottom-[-5px] after:left-0 after:w-0 after:h-0.5 after:bg-gray-900 hover:after:w-full after:transition-all"
-                >
-                  Home
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="font-medium hover:text-gray-700 transition relative after:absolute after:bottom-[-5px] after:left-0 after:w-0 after:h-0.5 after:bg-gray-900 hover:after:w-full after:transition-all"
-                >
-                  Services
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="font-medium hover:text-gray-700 transition relative after:absolute after:bottom-[-5px] after:left-0 after:w-0 after:h-0.5 after:bg-gray-900 hover:after:w-full after:transition-all"
-                >
-                  Providers
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="font-medium hover:text-gray-700 transition relative after:absolute after:bottom-[-5px] after:left-0 after:w-0 after:h-0.5 after:bg-gray-900 hover:after:w-full after:transition-all"
-                >
-                  How It Works
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="font-medium hover:text-gray-700 transition relative after:absolute after:bottom-[-5px] after:left-0 after:w-0 after:h-0.5 after:bg-gray-900 hover:after:w-full after:transition-all"
-                >
-                  About
-                </a>
-              </li>
-            </ul>
+        <div className="navbar-center hidden lg:flex">
+          <ul className="menu menu-horizontal gap-2">
+            <li>
+              <button className="btn btn-ghost">Home</button>
+            </li>
+            <li>
+              <button className="btn btn-ghost">Personal Space</button>
+            </li>
+            <li>
+              <button className="btn btn-ghost">FAQ</button>
+            </li>
+          </ul>
+        </div>
 
-            <div className="flex gap-3">
-              <button className="px-4 py-2 rounded-lg border border-gray-900 font-semibold hover:bg-gray-50 transition hover:-translate-y-0.5 hover:shadow-sm">
-                Log In
-              </button>
-              <button className="px-4 py-2 rounded-lg bg-gray-900 text-white font-semibold hover:bg-gray-800 transition hover:-translate-y-0.5 hover:shadow-md">
-                Sign Up
-              </button>
-            </div>
-          </nav>
+        <div className="navbar-end gap-2">
+          <Link href="/post" className="btn btn-accent">
+            <FaPlusCircle className="mr-2" />
+            Post
+          </Link>
+          <button
+            className={`btn ${walletConnected ? "btn-success" : "btn-primary"}`}
+            onClick={() => setWalletConnected(!walletConnected)}
+          >
+            <FaWallet className="mr-2" />
+            {walletConnected ? "Wallet Connected" : "Connect Wallet"}
+          </button>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="py-16 bg-gradient-to-b from-white to-gray-50">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="flex flex-col md:flex-row items-center gap-12">
-            <div className="md:w-1/2 text-center md:text-left">
-              <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6">
-                Find Trusted Crypto Services in Minutes
-              </h1>
-              <p className="text-gray-600 text-lg mb-8 max-w-lg mx-auto md:mx-0">
-                Connect with blockchain experts, developers, and service providers for all your cryptocurrency and
-                blockchain needs.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start mb-10">
-                <button className="px-6 py-3 rounded-lg bg-gray-900 text-white font-semibold hover:bg-gray-800 transition hover:-translate-y-0.5 hover:shadow-md">
-                  Find a Provider
-                </button>
-                <button className="px-6 py-3 rounded-lg border border-gray-900 font-semibold hover:bg-gray-50 transition hover:-translate-y-0.5 hover:shadow-sm">
-                  Become a Provider
-                </button>
+      {/* Main Content */}
+      <main className="container mx-auto p-4">
+        {/* Hero Section */}
+        <div className="text-center py-12">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-accent">Anonymous Services Marketplace</h1>
+          <p className="text-base-content/60 text-lg max-w-2xl mx-auto">
+            Marketplace where privacy is a first class citizen. Revealing yourself is an opt-in powered by privacy
+            preserving account-abstraction.
+          </p>
+        </div>
+
+        {/* Listings Container */}
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Services Section */}
+          <div
+            className="card bg-base-200"
+            onMouseEnter={() => setIsServicesHovering(true)}
+            onMouseLeave={() => setIsServicesHovering(false)}
+          >
+            <div className="card-body">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="card-title text-2xl">
+                  <FaLock className="text-accent" />
+                  Available Services
+                </h2>
+                <div className="flex gap-2">
+                  <button onClick={prevServices} className="btn btn-circle btn-ghost btn-sm">
+                    <FaChevronLeft />
+                  </button>
+                  <button onClick={nextServices} className="btn btn-circle btn-ghost btn-sm">
+                    <FaChevronRight />
+                  </button>
+                </div>
               </div>
-              <div className="flex flex-wrap justify-center md:justify-start gap-8">
-                <div>
-                  <h3 className="text-3xl font-bold">5,000+</h3>
-                  <p className="text-gray-600">Service Providers</p>
-                </div>
-                <div>
-                  <h3 className="text-3xl font-bold">120+</h3>
-                  <p className="text-gray-600">Blockchain Services</p>
-                </div>
-                <div>
-                  <h3 className="text-3xl font-bold">98%</h3>
-                  <p className="text-gray-600">Client Satisfaction</p>
-                </div>
+              <div className="relative overflow-hidden">
+                <motion.div
+                  className="grid gap-4"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  key={currentServiceIndex}
+                >
+                  {getVisibleServices().map(service => (
+                    <motion.div
+                      key={`${service.id}-${currentServiceIndex}`}
+                      className="card bg-base-300"
+                      layout
+                      initial="initial"
+                      animate="animate"
+                      whileHover="hover"
+                      whileTap="tap"
+                      variants={cardVariants}
+                    >
+                      <motion.div className="card-body" variants={contentVariants}>
+                        <motion.div className="flex justify-between items-start" variants={itemVariants}>
+                          <h3 className="card-title">{service.title}</h3>
+                          <motion.div
+                            className="badge badge-primary gap-2"
+                            whileHover={{ scale: 1.1 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                          >
+                            <FaEthereum />
+                            {service.price}
+                          </motion.div>
+                        </motion.div>
+                        <motion.p className="text-base-content/60" variants={itemVariants}>
+                          {service.description}
+                        </motion.p>
+                        <motion.div className="card-actions justify-end mt-4" variants={itemVariants}>
+                          <motion.button
+                            className="btn btn-primary"
+                            variants={buttonVariants}
+                            whileHover="hover"
+                            whileTap="tap"
+                          >
+                            <FaEye className="mr-2" />
+                            View Anonymously
+                          </motion.button>
+                        </motion.div>
+                      </motion.div>
+                    </motion.div>
+                  ))}
+                </motion.div>
               </div>
             </div>
-            <div className="md:w-1/2 flex justify-center">
-              <div className="w-full max-w-lg rounded-2xl overflow-hidden shadow-xl">
-                <img src="/Thumb.jpg" alt="Thumbnail Picture" className="w-full h-auto object-cover rounded-xl" />
+          </div>
+
+          {/* Requests Section */}
+          <div
+            className="card bg-base-200"
+            onMouseEnter={() => setIsRequestsHovering(true)}
+            onMouseLeave={() => setIsRequestsHovering(false)}
+          >
+            <div className="card-body">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="card-title text-2xl">
+                  <FaHandshake className="text-accent" />
+                  Service Requests
+                </h2>
+                <div className="flex gap-2">
+                  <button onClick={prevRequests} className="btn btn-circle btn-ghost btn-sm">
+                    <FaChevronLeft />
+                  </button>
+                  <button onClick={nextRequests} className="btn btn-circle btn-ghost btn-sm">
+                    <FaChevronRight />
+                  </button>
+                </div>
+              </div>
+              <div className="relative overflow-hidden">
+                <motion.div
+                  className="space-y-4"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  key={currentRequestIndex}
+                >
+                  {getVisibleRequests().map(request => (
+                    <motion.div
+                      key={`${request.id}-${currentRequestIndex}`}
+                      className="card bg-base-300"
+                      layout
+                      initial="initial"
+                      animate="animate"
+                      whileHover="hover"
+                      whileTap="tap"
+                      variants={cardVariants}
+                    >
+                      <motion.div className="card-body" variants={contentVariants}>
+                        <motion.div className="flex justify-between items-center" variants={itemVariants}>
+                          <div>
+                            <motion.h3 className="font-bold" variants={itemVariants}>
+                              {request.title}
+                            </motion.h3>
+                            <motion.div
+                              className="text-accent font-semibold flex items-center gap-2"
+                              variants={itemVariants}
+                            >
+                              <FaEthereum />
+                              {request.price}
+                            </motion.div>
+                          </div>
+                          <motion.button
+                            className="btn btn-outline btn-accent"
+                            variants={buttonVariants}
+                            whileHover="hover"
+                            whileTap="tap"
+                          >
+                            <FaPlusCircle className="mr-2" />
+                            Fulfill Request
+                          </motion.button>
+                        </motion.div>
+                      </motion.div>
+                    </motion.div>
+                  ))}
+                </motion.div>
               </div>
             </div>
           </div>
         </div>
-      </section>
-
-      {/* Service Form Section */}
-      <ServiceForm />
-
-      {/* Services Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Popular Services</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Explore our most in-demand blockchain and cryptocurrency services
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Service Card 1 */}
-            <div className="bg-white rounded-2xl overflow-hidden shadow-lg transition-transform hover:-translate-y-2">
-              <div className="h-48 bg-gray-100 flex items-center justify-center">
-                <FaCode className="text-5xl text-gray-800" />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-3">Smart Contract Development</h3>
-                <p className="text-gray-600 mb-4">
-                  Create secure and efficient smart contracts for your blockchain projects by top developers.
-                </p>
-                <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-                  <div className="flex items-center text-yellow-400">
-                    <FaStar />
-                    <FaStar />
-                    <FaStar />
-                    <FaStar />
-                    <FaStarHalfAlt />
-                    <span className="ml-2 text-gray-900">4.7</span>
-                  </div>
-                  <div className="font-bold">0.5 ETH</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Service Card 2 */}
-            <div className="bg-white rounded-2xl overflow-hidden shadow-lg transition-transform hover:-translate-y-2">
-              <div className="h-48 bg-gray-100 flex items-center justify-center">
-                <FaShieldAlt className="text-5xl text-gray-800" />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-3">Blockchain Security Audit</h3>
-                <p className="text-gray-600 mb-4">
-                  Comprehensive security audits for your blockchain projects to identify vulnerabilities.
-                </p>
-                <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-                  <div className="flex items-center text-yellow-400">
-                    <FaStar />
-                    <FaStar />
-                    <FaStar />
-                    <FaStar />
-                    <FaStar />
-                    <span className="ml-2 text-gray-900">5.0</span>
-                  </div>
-                  <div className="font-bold">1.2 ETH</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Service Card 3 */}
-            <div className="bg-white rounded-2xl overflow-hidden shadow-lg transition-transform hover:-translate-y-2">
-              <div className="h-48 bg-gray-100 flex items-center justify-center">
-                <FaWallet className="text-5xl text-gray-800" />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-3">Crypto Wallet Development</h3>
-                <p className="text-gray-600 mb-4">
-                  Custom cryptocurrency wallet development for all platforms with top security standards.
-                </p>
-                <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-                  <div className="flex items-center text-yellow-400">
-                    <FaStar />
-                    <FaStar />
-                    <FaStar />
-                    <FaStar />
-                    <FaStar className="text-gray-300" />
-                    <span className="ml-2 text-gray-900">4.2</span>
-                  </div>
-                  <div className="font-bold">2.0 ETH</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Providers Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Top Providers</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">Meet our most trusted and experienced service providers</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Provider Card 1 */}
-            <div className="bg-white rounded-2xl p-6 text-center shadow-lg transition-transform hover:-translate-y-1">
-              <div className="w-24 h-24 bg-gray-100 rounded-full mx-auto flex items-center justify-center mb-6">
-                <FaUser className="text-3xl text-gray-800" />
-              </div>
-              <h3 className="text-xl font-bold mb-1">Alex Johnson</h3>
-              <p className="text-gray-600 mb-4">Blockchain Developer</p>
-              <div className="flex flex-wrap justify-center gap-2 mb-5">
-                <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">Solidity</span>
-                <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">Ethereum</span>
-                <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">DeFi</span>
-              </div>
-              <p className="text-green-500 flex items-center justify-center">
-                <FaCheckCircle className="mr-2" />
-                320+ Projects
-              </p>
-            </div>
-
-            {/* Provider Card 2 */}
-            <div className="bg-white rounded-2xl p-6 text-center shadow-lg transition-transform hover:-translate-y-1">
-              <div className="w-24 h-24 bg-gray-100 rounded-full mx-auto flex items-center justify-center mb-6">
-                <FaUser className="text-3xl text-gray-800" />
-              </div>
-              <h3 className="text-xl font-bold mb-1">Sarah Chen</h3>
-              <p className="text-gray-600 mb-4">Security Expert</p>
-              <div className="flex flex-wrap justify-center gap-2 mb-5">
-                <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">Security</span>
-                <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">Auditing</span>
-                <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">Pen Testing</span>
-              </div>
-              <p className="text-green-500 flex items-center justify-center">
-                <FaCheckCircle className="mr-2" />
-                180+ Projects
-              </p>
-            </div>
-
-            {/* Provider Card 3 */}
-            <div className="bg-white rounded-2xl p-6 text-center shadow-lg transition-transform hover:-translate-y-1">
-              <div className="w-24 h-24 bg-gray-100 rounded-full mx-auto flex items-center justify-center mb-6">
-                <FaUser className="text-3xl text-gray-800" />
-              </div>
-              <h3 className="text-xl font-bold mb-1">Michael Rodriguez</h3>
-              <p className="text-gray-600 mb-4">NFT Specialist</p>
-              <div className="flex flex-wrap justify-center gap-2 mb-5">
-                <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">NFTs</span>
-                <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">ERC-721</span>
-                <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">Marketplaces</span>
-              </div>
-              <p className="text-green-500 flex items-center justify-center">
-                <FaCheckCircle className="mr-2" />
-                450+ Projects
-              </p>
-            </div>
-
-            {/* Provider Card 4 */}
-            <div className="bg-white rounded-2xl p-6 text-center shadow-lg transition-transform hover:-translate-y-1">
-              <div className="w-24 h-24 bg-gray-100 rounded-full mx-auto flex items-center justify-center mb-6">
-                <FaUser className="text-3xl text-gray-800" />
-              </div>
-              <h3 className="text-xl font-bold mb-1">Emma Williams</h3>
-              <p className="text-gray-600 mb-4">Tokenomics Expert</p>
-              <div className="flex flex-wrap justify-center gap-2 mb-5">
-                <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">Token Design</span>
-                <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">Economics</span>
-                <span className="bg-gray-100 px-3 py-1 rounded-full text-sm">Whitepapers</span>
-              </div>
-              <p className="text-green-500 flex items-center justify-center">
-                <FaCheckCircle className="mr-2" />
-                210+ Projects
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white pt-16 pb-8">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-            <div>
-              <h3 className="text-lg font-bold mb-4">CryptoMarket</h3>
-              <p className="text-gray-400">The leading marketplace for blockchain and cryptocurrency services.</p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-bold mb-4">Quick Links</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition">
-                    Home
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition">
-                    Services
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition">
-                    Providers
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition">
-                    How It Works
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition">
-                    About
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-bold mb-4">Services</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition">
-                    Smart Contracts
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition">
-                    DApp Development
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition">
-                    Security Audits
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition">
-                    Token Creation
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition">
-                    NFT Development
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-bold mb-4">Connect</h3>
-              <div className="flex gap-4">
-                <a href="#" className="text-gray-400 hover:text-white transition">
-                  <FaTwitter className="text-xl" />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white transition">
-                  <FaDiscord className="text-xl" />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white transition">
-                  <FaTelegram className="text-xl" />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white transition">
-                  <FaGithub className="text-xl" />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white transition">
-                  <FaMedium className="text-xl" />
-                </a>
-              </div>
-            </div>
+      <footer className="footer footer-center p-10 bg-base-200 text-base-content rounded">
+        <div>
+          <p className="text-base-content/60">
+            AnonServe - The Anonymous Services Marketplace. No tracking. No personal data. Just services.
+          </p>
+          <div className="flex gap-4 mt-4">
+            <a className="link link-accent">Privacy Policy</a>
+            <a className="link link-accent">Terms of Service</a>
+            <a className="link link-accent">How It Works</a>
+            <a className="link link-accent">Contact</a>
           </div>
-
-          <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 CryptoMarket. All rights reserved.</p>
-          </div>
+          <p className="text-base-content/40 mt-4">© 2024 AnonServe. All transactions are anonymous and encrypted.</p>
         </div>
       </footer>
     </div>

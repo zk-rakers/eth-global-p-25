@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { hashAndStoreData } from "../utils/encryption";
+import { usePrivacyMarketplace } from "../hooks/scaffold-eth/usePrivacyMarketplace";
 
 const getSystemPrompt = (mode) => {
   if (mode === 'request') {
@@ -62,7 +64,12 @@ const AI_child = ({ initialMode = "request", onBack, onSubmit }) => {
   const [initProgress, setInitProgress] = useState("");
   const [generating, setGenerating] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const messagesEndRef = useRef(null);
+
+  const { submitService, isLoading } = usePrivacyMarketplace();
 
   useEffect(() => {
     const systemPrompt = getSystemPrompt(mode);
@@ -126,7 +133,8 @@ const AI_child = ({ initialMode = "request", onBack, onSubmit }) => {
       setGenerating(false);
     }
   };
-  const handleSubmit = () => {
+
+  const handleSubmit = async () => {
     const lastAssistantReply = [...messages].reverse().find(m => m.role === 'assistant');
     if (!lastAssistantReply || !lastAssistantReply.content) return;
   
@@ -145,9 +153,37 @@ const AI_child = ({ initialMode = "request", onBack, onSubmit }) => {
       alert("⚠️ Please make sure the assistant response includes a Title and a meaningful Description (at least 30 characters).");
       return;
     }
-  
-    //console.log("📝 Parsed Request:", { title, description });
-    onSubmit?.({ title, description });
+
+    setError(null);
+    setSuccess(null);
+    setIsSubmitting(true);
+
+    try {
+      console.log("Starting form submission...");
+      const data = {
+        title,
+        description
+      };
+
+      console.log("Hashing and storing data...");
+      const { hash, ipfsHash } = await hashAndStoreData(data);
+      console.log("Data stored, hash:", hash);
+      console.log("IPFS hash:", ipfsHash);
+
+      console.log("Submitting to contract...");
+      const result = await submitService(hash, ipfsHash);
+      console.log("Contract submission result:", result);
+
+      if (result) {
+        setSuccess("Service submitted successfully!");
+        onSubmit?.({ title, description });
+      }
+    } catch (err) {
+      console.error("Error submitting service:", err);
+      setError(err instanceof Error ? err.message : "Failed to submit service");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   return (
@@ -166,12 +202,24 @@ const AI_child = ({ initialMode = "request", onBack, onSubmit }) => {
           <button
             onClick={handleSubmit}
             className="bg-green-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
-            disabled={generating || loadingModel}
+            disabled={generating || loadingModel || isSubmitting || isLoading}
           >
-            Submit Request
+            {isSubmitting || isLoading ? "Submitting..." : "Submit Request"}
           </button>
         )}
       </div>
+
+      {error && (
+        <div className="p-2 border-b border-red-200 bg-red-50">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
+
+      {success && (
+        <div className="p-2 border-b border-green-200 bg-green-50">
+          <p className="text-sm text-green-600">{success}</p>
+        </div>
+      )}
 
       {loadingModel && (
         <div className="p-2 border-b border-gray-200">
@@ -200,7 +248,7 @@ const AI_child = ({ initialMode = "request", onBack, onSubmit }) => {
         <input
           type="text"
           placeholder="Type your message..."
-          className="flex-1 p-1 border border-gray-300 rounded text-sm"
+          className="flex-1 p-1 border border-gray-300 rounded text-sm text-black"
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
@@ -211,7 +259,7 @@ const AI_child = ({ initialMode = "request", onBack, onSubmit }) => {
               }
             }
           }}
-          disabled={generating || loadingModel}
+          disabled={generating || loadingModel || isSubmitting || isLoading}
         />
         <button
           onClick={(e) => {
@@ -222,7 +270,7 @@ const AI_child = ({ initialMode = "request", onBack, onSubmit }) => {
             }
           }}
           className="bg-black text-white px-3 py-1 rounded text-sm disabled:opacity-50"
-          disabled={generating || loadingModel}
+          disabled={generating || loadingModel || isSubmitting || isLoading}
         >
           Send
         </button>
