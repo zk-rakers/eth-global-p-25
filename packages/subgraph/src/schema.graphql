@@ -23,6 +23,8 @@ type Request @entity(immutable:true){
   timestamp: BigInt!
   isActive: Boolean!
   bidCount: BigInt!
+  userIdentifier: Bytes!
+  title: String!
   bids: [Bid!]! @derivedFrom(field: "request")
 }
 
@@ -34,5 +36,6 @@ type Bid @entity(immutable:true) {
   encryptedBidMetadataCID: String!
   timestamp: BigInt!
   isAccepted: Boolean!
+  userIdentifier: Bytes!
   encryptedKey: String
 }

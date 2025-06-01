@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "./DeployHelpers.s.sol";
 import { DeployPrivacyMarketplace } from "./DeployPrivacyMarketplace.s.sol";
+import { DeployZkAccountFactory } from "./DeployZkAccountFactory.s.sol";
 
 /**
  * @notice Main deployment script for all contracts
@@ -15,12 +16,13 @@ contract DeployScript is ScaffoldETHDeploy {
         // Deploys all your contracts sequentially
         // Add new deployments here when needed
 
-        DeployYourContract deployYourContract = new DeployYourContract();
-        deployYourContract.run();
-
         // Deploy PrivacyMarketplace contract
         DeployPrivacyMarketplace deployPrivacyMarketplace = new DeployPrivacyMarketplace();
         deployPrivacyMarketplace.run();
+
+        // Deploy ZkAccountFactory contract
+        DeployZkAccountFactory deployZkAccountFactory = new DeployZkAccountFactory();
+        deployZkAccountFactory.run();
 
         // Deploy another contract
         // DeployMyContract myContract = new DeployMyContract();

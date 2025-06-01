@@ -23,7 +23,7 @@ export function usePrivacyMarketplace() {
 
         const tx = await postRequest({
           functionName: "postRequest",
-          args: [bytes32Hash as `0x${string}`, formattedIpfsHash as `0x${string}`],
+          args: [bytes32Hash as `0x${string}`, formattedIpfsHash as `0x${string}`, "", ""],
         });
 
         console.log("Transaction result:", tx);

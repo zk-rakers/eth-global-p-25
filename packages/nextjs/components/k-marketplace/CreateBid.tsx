@@ -51,8 +51,6 @@ export const CreateBid = () => {
   // Initialize 4337 hook
   const {
     isLoading: is4337Loading,
-    isInitialized,
-    initializeClients,
     sendUserOperation,
     estimateUserOpGas,
   } = use4337UserOp({
@@ -67,11 +65,6 @@ export const CreateBid = () => {
     functionName: "getRequest",
     args: formData.requestId ? [BigInt(formData.requestId)] : [BigInt(0)],
   });
-
-  // Initialize 4337 clients on mount
-  useEffect(() => {
-    initializeClients();
-  }, [initializeClients]);
 
   // Update request details when data changes
   useEffect(() => {
@@ -135,11 +128,6 @@ export const CreateBid = () => {
 
     if (!address || !walletClient) {
       notification.error("Wallet not connected. Please connect your wallet.");
-      return;
-    }
-
-    if (!isInitialized) {
-      notification.error("Smart account not initialized. Please check your wallet connection.");
       return;
     }
 
@@ -289,14 +277,6 @@ export const CreateBid = () => {
       <div className="text-center">
         <h2 className="text-3xl font-bold">Submit Private Bid</h2>
         <p className="text-base-content/70 mt-2">Create an anonymous bid using ERC-4337 meta-transactions</p>
-      </div>
-
-      {/* Connection Status */}
-      <div className="alert alert-info">
-        <div className="flex items-center gap-2">
-          <div className={`w-3 h-3 rounded-full ${isInitialized ? "bg-green-500" : "bg-red-500"}`}></div>
-          <span>{isInitialized ? "✅ Smart Account Ready" : "❌ Initializing Smart Account..."}</span>
-        </div>
       </div>
 
       {/* Request ID Input */}
@@ -460,7 +440,6 @@ export const CreateBid = () => {
           isLoading ||
           !address ||
           !walletClient ||
-          !isInitialized ||
           !formData.requestId ||
           !formData.bidAmount ||
           !formData.proposalText ||
