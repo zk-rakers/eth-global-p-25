@@ -58,8 +58,6 @@ export const PostRequest = () => {
   // Initialize 4337 hook
   const {
     isLoading: is4337Loading,
-    isInitialized,
-    initializeClients,
     sendUserOperation,
     estimateUserOpGas,
   } = use4337UserOp({
@@ -73,11 +71,6 @@ export const PostRequest = () => {
     contractName: "PrivacyMarketplace",
     functionName: "getTotalRequests",
   });
-
-  // Initialize 4337 clients on mount
-  useEffect(() => {
-    initializeClients();
-  }, [initializeClients]);
 
   // Generate random salt for privacy
   const generateSalt = () => {
@@ -132,11 +125,6 @@ export const PostRequest = () => {
 
     if (!address || !walletClient) {
       notification.error("Wallet not connected. Please connect your wallet.");
-      return;
-    }
-
-    if (!isInitialized) {
-      notification.error("Smart account not initialized. Please check your wallet connection.");
       return;
     }
 
@@ -282,14 +270,6 @@ export const PostRequest = () => {
         {totalRequests !== undefined && (
           <div className="badge badge-info mt-2">Total Requests: {totalRequests.toString()}</div>
         )}
-      </div>
-
-      {/* Connection Status */}
-      <div className="alert alert-info">
-        <div className="flex items-center gap-2">
-          <div className={`w-3 h-3 rounded-full ${isInitialized ? "bg-green-500" : "bg-red-500"}`}></div>
-          <span>{isInitialized ? "✅ Smart Account Ready" : "❌ Initializing Smart Account..."}</span>
-        </div>
       </div>
 
       {/* Request Title */}
@@ -459,13 +439,7 @@ export const PostRequest = () => {
         className="btn btn-primary btn-lg"
         onClick={handlePostRequest}
         disabled={
-          isLoading ||
-          !address ||
-          !walletClient ||
-          !isInitialized ||
-          !formData.title ||
-          !formData.description ||
-          !formData.budget
+          isLoading || !address || !walletClient || !formData.title || !formData.description || !formData.budget
         }
       >
         {isLoading ? (

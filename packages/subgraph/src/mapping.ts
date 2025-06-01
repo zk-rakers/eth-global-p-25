@@ -1,35 +1,67 @@
-import { BigInt, Address } from "@graphprotocol/graph-ts";
+import { BigInt, Bytes } from "@graphprotocol/graph-ts";
 import {
-  YourContract,
-  GreetingChange,
-} from "../generated/YourContract/YourContract";
-import { Greeting, Sender } from "../generated/schema";
+  PrivacyMarketplace,
+  RequestPosted,
+  BidSubmitted,
+  BidAccepted,
+  ChannelKeyPublished
+} from "../generated/PrivacyMarketplace/PrivacyMarketplace";
+import { Request, Bid } from "../generated/schema";
 
-export function handleGreetingChange(event: GreetingChange): void {
-  let senderString = event.params.greetingSetter.toHexString();
+export function handleRequestPosted(event: RequestPosted): void {
+  const requestId = event.params.requestId.toString();
+  
+  let request = new Request(requestId);
+  request.commitment = event.params.commitment;
+  request.encryptedCID = event.params.encryptedCID;
+  request.timestamp = event.params.timestamp;
+  request.isActive = true;
+  request.bidCount = BigInt.fromI32(0);
+  request.userIdentifier = event.params.userIdentifier;
+  request.title = event.params.title;
+  request.save();
+}
 
-  let sender = Sender.load(senderString);
+export function handleBidSubmitted(event: BidSubmitted): void {
+  const requestId = event.params.requestId.toString();
+  const bidId = requestId + "-" + event.params.bidIndex.toString();
+  
+  let bid = new Bid(bidId);
+  bid.request = requestId;
+  bid.bidIndex = event.params.bidIndex;
+  bid.bidderCommitment = event.params.bidderCommitment;
+  bid.encryptedBidMetadataCID = event.params.encryptedBidMetadataCID;
+  bid.timestamp = event.params.timestamp;
+  bid.isAccepted = false;
+  bid.userIdentifier = event.params.userIdentifier;
+  bid.save();
 
-  if (sender === null) {
-    sender = new Sender(senderString);
-    sender.address = event.params.greetingSetter;
-    sender.createdAt = event.block.timestamp;
-    sender.greetingCount = BigInt.fromI32(1);
-  } else {
-    sender.greetingCount = sender.greetingCount.plus(BigInt.fromI32(1));
+  // Update request bid count
+  let request = Request.load(requestId);
+  if (request) {
+    request.bidCount = request.bidCount.plus(BigInt.fromI32(1));
+    request.save();
   }
+}
 
-  let greeting = new Greeting(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-  );
+export function handleBidAccepted(event: BidAccepted): void {
+  const requestId = event.params.requestId.toString();
+  const bidId = requestId + "-" + event.params.bidIndex.toString();
+  
+  let bid = Bid.load(bidId);
+  if (bid) {
+    bid.isAccepted = true;
+    bid.save();
+  }
+}
 
-  greeting.greeting = event.params.newGreeting;
-  greeting.sender = senderString;
-  greeting.premium = event.params.premium;
-  greeting.value = event.params.value;
-  greeting.createdAt = event.block.timestamp;
-  greeting.transactionHash = event.transaction.hash.toHex();
-
-  greeting.save();
-  sender.save();
+export function handleChannelKeyPublished(event: ChannelKeyPublished): void {
+  const requestId = event.params.requestId.toString();
+  const bidId = requestId + "-" + event.params.bidIndex.toString();
+  
+  let bid = Bid.load(bidId);
+  if (bid) {
+    bid.encryptedKey = event.params.encryptedKey;
+    bid.save();
+  }
 }

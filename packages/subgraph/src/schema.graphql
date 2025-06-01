@@ -15,3 +15,27 @@ type Sender @entity(immutable:true) {
   createdAt: BigInt!
   greetingCount: BigInt!
 }
+
+type Request @entity(immutable:true){
+  id: ID!
+  commitment: Bytes!
+  encryptedCID: String!
+  timestamp: BigInt!
+  isActive: Boolean!
+  bidCount: BigInt!
+  userIdentifier: Bytes!
+  title: String!
+  bids: [Bid!]! @derivedFrom(field: "request")
+}
+
+type Bid @entity(immutable:true) {
+  id: ID!
+  request: Request!
+  bidIndex: BigInt!
+  bidderCommitment: Bytes!
+  encryptedBidMetadataCID: String!
+  timestamp: BigInt!
+  isAccepted: Boolean!
+  userIdentifier: Bytes!
+  encryptedKey: String
+}

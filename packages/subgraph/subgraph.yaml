@@ -1,26 +1,34 @@
 specVersion: 0.0.4
-description: Greetings
+description: Privacy Marketplace Subgraph
 repository: https://github.com/scaffold-eth/se-2/packages/subgraph/
 schema:
   file: ./src/schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: YourContract
+    name: PrivacyMarketplace
     network: localhost
     source:
-      abi: YourContract
-      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+      abi: PrivacyMarketplace
+      address: "0x700b6a60ce7eaaea56f065753d8dcb9653dbad35"
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
-        - Greeting
-        - Sender
+        - Request
+        - Bid
       abis:
-        - name: YourContract
-          file: ./abis/localhost_YourContract.json
+        - name: PrivacyMarketplace
+          file: ./abis/localhost_PrivacyMarketplace.json
       eventHandlers:
-        - event: GreetingChange(indexed address,string,bool,uint256)
-          handler: handleGreetingChange
+        - event: RequestPosted(indexed uint256,indexed bytes32,indexed
+            bytes32,string,string,uint256)
+          handler: handleRequestPosted
+        - event: BidSubmitted(indexed uint256,indexed uint256,indexed
+            bytes32,bytes32,string,uint256)
+          handler: handleBidSubmitted
+        - event: BidAccepted(indexed uint256,indexed uint256,uint256)
+          handler: handleBidAccepted
+        - event: ChannelKeyPublished(indexed uint256,indexed uint256,string,uint256)
+          handler: handleChannelKeyPublished
       file: ./src/mapping.ts
