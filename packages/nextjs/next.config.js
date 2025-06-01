@@ -1,8 +1,36 @@
 const webpack = require('webpack');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
+const withMDX = require('@next/mdx')({
+  extension: /\.mdx?$/,
+});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'mdx'],
+  async headers() {
+    return [
+      {
+        // Apply these headers to all routes
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, DELETE, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'X-Requested-With, Content-Type, Authorization',
+          },
+        ],
+      },
+    ];
+  },
+  // Add allowed development origins
+  allowedDevOrigins: ['172.28.4.156'],
   webpack: (config, { isServer }) => {
     if (!isServer) {
       // Add Node polyfill plugin
@@ -63,4 +91,4 @@ const nextConfig = {
   output: 'export',
 };
 
-module.exports = nextConfig; /** @type {import('next').NextConfig} */
+module.exports = withMDX(nextConfig); 

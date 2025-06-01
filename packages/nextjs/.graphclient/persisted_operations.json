@@ -1,3 +1,5 @@
 {
-  "0f297a8d2a5ec4bc2a5724a8582baf2b6027a6394dc10901d073d4602d66e9d4": "query GetGreetings {\n  greetings(first: 25, orderBy: createdAt, orderDirection: desc) {\n    id\n    greeting\n    premium\n    value\n    createdAt\n    sender {\n      address\n      greetingCount\n    }\n  }\n}"
+  "0f297a8d2a5ec4bc2a5724a8582baf2b6027a6394dc10901d073d4602d66e9d4": "query GetGreetings {\n  greetings(first: 25, orderBy: createdAt, orderDirection: desc) {\n    id\n    greeting\n    premium\n    value\n    createdAt\n    sender {\n      address\n      greetingCount\n    }\n  }\n}",
+  "1fa2b97910102809c3294fb296641b657c0b19a91a49c96e57affe62a7ed0b0d": "query GetRequests($identifier: Bytes!) {\n  requests(\n    where: {userIdentifier: $identifier}\n    orderBy: timestamp\n    orderDirection: desc\n  ) {\n    bidCount\n    commitment\n    isActive\n    id\n    title\n    timestamp\n    userIdentifier\n  }\n}",
+  "051487c01a127ad49931b81b930b317f95a5e562c5df3868cf32ba9f561c4f21": "query GetAllRequests {\n  requests {\n    bidCount\n    commitment\n    isActive\n    id\n    title\n    timestamp\n    userIdentifier\n  }\n}"
 }
