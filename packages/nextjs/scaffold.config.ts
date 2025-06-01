@@ -13,7 +13,7 @@ export const DEFAULT_ALCHEMY_API_KEY = "oKxs-03sij-U_N0iOlrSsZFr29-IqbuF";
 
 const scaffoldConfig = {
   // The networks on which your DApp is live
-  targetNetworks: [chains.foundry],
+  targetNetworks: [chains.foundry, chains.sepolia],
   // targetNetworks: [chains.sepolia],
 
   // The interval at which your front-end polls the RPC servers for new data

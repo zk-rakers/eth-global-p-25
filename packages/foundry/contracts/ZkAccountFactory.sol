@@ -17,8 +17,7 @@ contract ZkAccountFactory {
 
     error InvalidProof();
 
-    constructor(IEntryPoint _entryPoint, IZKVerifier _zkVerifier) {
-        entryPoint = _entryPoint;
+    constructor(IZKVerifier _zkVerifier) {
         zkVerifier = _zkVerifier;
     }
 

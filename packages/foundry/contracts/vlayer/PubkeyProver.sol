@@ -27,7 +27,7 @@ contract PubkeyProver is Prover {
         return ecrecover(_message, v, r, s);
     }
 
-    function proofPubKey(bytes32 _message, bytes memory _signature) public returns (Proof memory, bytes32 _nullifier) 
+    function proofPubKey(bytes32 _message, bytes memory _signature) public pure returns (Proof memory, bytes32 _nullifier) 
     {
         address signer = recoverSigner(_message, _signature);
         require(signer != address(0), "invalid signature");

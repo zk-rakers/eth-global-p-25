@@ -5,6 +5,7 @@ import { encodeFunctionData, keccak256, toHex } from "viem";
 import { useAccount, useWalletClient } from "wagmi";
 import { EtherInput } from "~~/components/scaffold-eth";
 import { use4337UserOp } from "~~/hooks/k-marketplace";
+import { usePubkeyProof } from "~~/hooks/k-marketplace/usePubkeyProof";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import { notification } from "~~/utils/scaffold-eth";
 
@@ -116,6 +117,8 @@ export const PostRequest = () => {
     }));
   };
 
+  const { handleSignAndGetProof } = usePubkeyProof();
+
   const handlePostRequest = async () => {
     // Validation
     if (!formData.title || !formData.description || !formData.budget) {
@@ -130,6 +133,17 @@ export const PostRequest = () => {
 
     setIsPosting(true);
     let notificationId: string | null = null;
+
+    let proof: string | null = null;
+
+    try {
+      proof = await handleSignAndGetProof();
+      console.log("proof", proof);
+    } catch (error) {
+      console.error("Failed to sign and get proof:", error);
+      notification.error("Failed to sign and get proof");
+      return;
+    }
 
     try {
       // Generate user identifier by signing a message

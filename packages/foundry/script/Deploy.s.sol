@@ -7,6 +7,9 @@ import { DeployZkAccountFactory } from "./DeployZkAccountFactory.s.sol";
 import { DeployPubkeyVerifier } from "./DeployPubkeyVerifier.s.sol";
 import { DeployPubkeyProver } from "./DeployPubkeyProver.s.sol";
 
+import { PubkeyProver } from "../contracts/vlayer/PubkeyProver.sol";
+import { PubkeyVerifier } from "../contracts/vlayer/PubkeyVerifier.sol";
+
 /**
  * @notice Main deployment script for all contracts
  * @dev Run this when you want to deploy multiple contracts at once
@@ -22,20 +25,18 @@ contract DeployScript is ScaffoldETHDeploy {
         DeployPrivacyMarketplace deployPrivacyMarketplace = new DeployPrivacyMarketplace();
         deployPrivacyMarketplace.run();
 
-        // Deploy PubkeyProver contract
-        DeployPubkeyProver deployPubkeyProver = new DeployPubkeyProver();
-        deployPubkeyProver.run();
+        PubkeyProver pubkeyProver = new PubkeyProver();
+        console.logString(string.concat("PubkeyProver deployed at: ", vm.toString(address(pubkeyProver))));
 
-        // Deploy PubkeyVerifier contract
-        DeployPubkeyVerifier deployPubkeyVerifier = new DeployPubkeyVerifier(
-            address(deployPubkeyProver)
-        );
-        deployPubkeyVerifier.run();
+        deployments.push(Deployment({ name: "PubkeyProver", addr: address(pubkeyProver) }));
+
+        PubkeyVerifier pubkeyVerifier = new PubkeyVerifier(address(pubkeyProver));
+
+        deployments.push(Deployment({ name: "PubkeyVerifier", addr: address(pubkeyVerifier) }));
 
         // Deploy ZkAccountFactory contract
         DeployZkAccountFactory deployZkAccountFactory = new DeployZkAccountFactory(
-            address(deployPubkeyVerifier),
-            address(deployPubkeyProver)
+            address(pubkeyVerifier)
         );
         deployZkAccountFactory.run();
     }

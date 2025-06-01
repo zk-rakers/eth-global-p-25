@@ -1,36 +1,46 @@
-import { useCallback } from "react";
-import { useScaffoldReadContract } from "../scaffold-eth";
+import { useCallback, useState } from "react";
+import { useSelectedNetwork } from "../scaffold-eth";
 import { signMessage } from "wagmi/actions";
-import { useAccount } from "wagmi";
+import { useAccount, useConfig } from "wagmi";
+import { keccak256 } from "viem";
+import { createVlayerClient } from "@vlayer/sdk";
+import PubkeyProver from "~~/vlayer_abi/proover.json";
+
+const vlayer = createVlayerClient();
 
 export const usePubkeyProof = () => {
-  const { address: account } = useAccount();
+  const { address: account, chain: accountChain } = useAccount();
+  const selectedNetwork = useSelectedNetwork(accountChain?.id);
 
-  const { data: salt } = useScaffoldReadContract({
-    contractName: "PubkeyProver",
-    functionName: "SALT",
-  });
+  const config = useConfig();
 
-  const { data: pubkeyProver } = useScaffoldReadContract({
-    contractName: "PubkeyProver",
-    functionName: "proofPubKey",
-    args: [salt, "0x6100000000000000000000000000000000000000000000000000000000000000"],
-  });
+  const [salt, ] = useState(() => keccak256("ETH_PRAGUE_25"));
 
   const handleSignAndGetProof = useCallback(async () => {
-    const message = "Hello, world!";
 
-    const signature = await signMessage(
+    const signature = await signMessage(config, 
       {
-        message: message,
-      },
-      {
+        message: salt,
         account: account,
       },
     );
 
-    return signature;
-  }, [account, salt]);
+    console.log("signature", signature);
+
+    const hash = await vlayer.prove({
+      address: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
+      proverAbi: PubkeyProver.abi as any,
+      functionName: 'proofPubKey',
+      args: [salt, signature],
+      chainId: selectedNetwork.id,
+    });
+
+    debugger
+
+    console.log("proof", hash);
+
+    return hash;
+  }, [account, salt, selectedNetwork]);
 
   return {
     handleSignAndGetProof,

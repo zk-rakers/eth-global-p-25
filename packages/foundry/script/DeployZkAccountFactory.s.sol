@@ -85,15 +85,12 @@ contract DeployZkAccountFactory is ScaffoldETHDeploy {
     // You can update these addresses based on the latest ERC-4337 deployments
     mapping(uint256 => address) public officialEntryPoints;
 
-    IZKVerifier public pubkeyVerifier;
-    address public pubkeyProver;
+    address public pubkeyVerifier;
 
     constructor(
-        IZKVerifier _pubkeyVerifier,
-        address _pubkeyProver
+        address _pubkeyVerifier
     ) {
         pubkeyVerifier = _pubkeyVerifier;
-        pubkeyProver = _pubkeyProver;
 
         // Initialize official EntryPoint addresses
         _initializeEntryPointAddresses();
@@ -110,7 +107,7 @@ contract DeployZkAccountFactory is ScaffoldETHDeploy {
         IZKVerifier zkVerifier = _deployZKVerifier();
         
         // Deploy ZkAccountFactory
-        ZkAccountFactory zkAccountFactory = new ZkAccountFactory(entryPoint, zkVerifier);
+        ZkAccountFactory zkAccountFactory = new ZkAccountFactory(zkVerifier);
         
         console.logString(string.concat("ZkAccountFactory deployed at: ", vm.toString(address(zkAccountFactory))));
         console.logString(string.concat("EntryPoint used: ", vm.toString(address(entryPoint))));
@@ -174,11 +171,9 @@ contract DeployZkAccountFactory is ScaffoldETHDeploy {
             console.logString("Deployed MockZKVerifier for local development");
             // Set some default valid proofs for testing
             _setupTestProofs(mockVerifier);
-        } else {
-            console.logString("WARNING: Using MockZKVerifier. Replace with real ZK verifier for production!");
-        }
-        
-        return IZKVerifier(address(mockVerifier));
+        }        
+
+        return IZKVerifier(pubkeyVerifier);
     }
     
     function _setupTestProofs(MockZKVerifier mockVerifier) private {
