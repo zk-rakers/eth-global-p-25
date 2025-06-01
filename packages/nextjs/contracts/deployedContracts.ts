@@ -101,6 +101,11 @@ const deployedContracts = {
               internalType: "bytes32",
             },
             {
+              name: "userIdentifier",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+            {
               name: "commitment",
               type: "bytes32",
               internalType: "bytes32",
@@ -553,6 +558,12 @@ const deployedContracts = {
             },
             {
               name: "encryptedCID",
+              type: "string",
+              indexed: false,
+              internalType: "string",
+            },
+            {
+              name: "title",
               type: "string",
               indexed: false,
               internalType: "string",

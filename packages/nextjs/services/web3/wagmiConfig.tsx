@@ -22,6 +22,9 @@ export const wagmiConfig = createConfig({
     const rpcOverrideUrl = (scaffoldConfig.rpcOverrides as ScaffoldConfig["rpcOverrides"])?.[chain.id];
     if (rpcOverrideUrl) {
       rpcFallbacks = [http(rpcOverrideUrl), http()];
+    } else if (chain.id === (hardhat as Chain).id) {
+      // Use our proxy for local node
+      rpcFallbacks = [http("/api/proxy"), http()];
     } else {
       const alchemyHttpUrl = getAlchemyHttpUrl(chain.id);
       if (alchemyHttpUrl) {

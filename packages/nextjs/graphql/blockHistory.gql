@@ -1,0 +1,11 @@
+query GetAllRequests {
+  requests {
+    bidCount
+    commitment
+    isActive
+    id
+    title
+    timestamp
+    userIdentifier
+  }
+}
